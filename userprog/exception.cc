@@ -222,15 +222,16 @@ ExceptionHandler(ExceptionType which)
 			//Kiem tra xem OS con mo dc file khong
 			
 			// update 4/1/2018
-			int freeSlot = fileSystem->FindFreeSlot();
+			int freeSlot = kernel->fileSystem->FindFreeSlot();
 			if (freeSlot != -1) //Chi xu li khi con slot trong
 			{
 				if (type == 0 || type == 1) //chi xu li khi type = 0 hoac 1
 				{
 					
-					if ((fileSystem->openf[freeSlot] = fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
+					if ((kernel->fileSystem->openf[freeSlot] = kernel->fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
 					{
 						kernel->machine->WriteRegister(2, freeSlot); //tra ve OpenFileID
+						printf("Open file success \n");
 					}
 				}
 				else  
@@ -254,18 +255,18 @@ ExceptionHandler(ExceptionType which)
 	{
 		//Input id cua file(OpenFileID)
 		// Output: 0: thanh cong, -1 that bai
-		int fid = machine->ReadRegister(4); // Lay id cua file tu thanh ghi so 4
+		int fid = kernel->machine->ReadRegister(4); // Lay id cua file tu thanh ghi so 4
 		if (fid >= 0 && fid <= 19) //Chi xu li khi fid nam trong [0, 19]
 		{
-			if (fileSystem->openf[fid]) //neu mo file thanh cong
+			if (kernel->fileSystem->openf[fid]) //neu mo file thanh cong
 			{
-				delete fileSystem->openf[fid]; //Xoa vung nho luu tru file
-				fileSystem->openf[fid] = NULL; //Gan vung nho NULL
-				machine->WriteRegister(2, 0);
+				delete kernel->fileSystem->openf[fid]; //Xoa vung nho luu tru file
+				kernel->fileSystem->openf[fid] = NULL; //Gan vung nho NULL
+				kernel->machine->WriteRegister(2, 0);
 				break;
 			}
 		}
-		machine->WriteRegister(2, -1);
+		kernel->machine->WriteRegister(2, -1);
 		break;
 	}
 

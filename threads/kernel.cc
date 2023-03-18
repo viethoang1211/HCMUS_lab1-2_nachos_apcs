@@ -93,6 +93,16 @@ Kernel::Initialize()
     currentThread = new Thread("main");		
     currentThread->setStatus(RUNNING);
 
+
+    // #ifdef FILESYS_NEEDED
+    // bool format = FALSE;	// format disk
+    // #endif
+    // #ifdef FILESYS_NEEDED
+	// if (!strcmp(*argv, "-f"))
+	//     format = TRUE;
+    // #endif
+    bool format = FALSE;
+
     stats = new Statistics();		// collect statistics
     interrupt = new Interrupt;		// start up interrupt handling
     scheduler = new Scheduler();	// initialize the ready queue
@@ -102,7 +112,7 @@ Kernel::Initialize()
     synchConsoleOut = new SynchConsoleOutput(consoleOut); // output to stdout
     synchDisk = new SynchDisk();    //
 #ifdef FILESYS_STUB
-    fileSystem = new FileSystem();
+    fileSystem = new FileSystem(format);
 #else
     fileSystem = new FileSystem(formatFlag);
 #endif // FILESYS_STUB

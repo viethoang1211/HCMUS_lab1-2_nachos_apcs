@@ -29,7 +29,12 @@
 					// See definitions listed under #else
 class OpenFile {
   public:
-    OpenFile(int f) { file = f; currentOffset = 0; }	// open the file
+
+	int type;
+
+    OpenFile(int f) { file = f; currentOffset = 0;type=0; }	// open the file
+    OpenFile(int f,int t) { file = f; currentOffset = 0;type=t; }	// open the file type t
+
     ~OpenFile() { Close(file); }			// close the file
 
     int ReadAt(char *into, int numBytes, int position) { 
@@ -69,9 +74,14 @@ class OpenFile {
 	int type;
 	//type 0: read and write
 	//type 1: read only
+	//type2 : console in
+	//type 3: console out
 	
     OpenFile(int sector);		// Open a file whose header is located
 					// at "sector" on the disk
+
+    OpenFile(int sector,int type);		// Open a file whose header is located
+	
     ~OpenFile();			// Close the file
 
     void Seek(int position); 		// Set the position from which to 

@@ -2,6 +2,6 @@
 
 
 int main(){
-    Create("testCreateFile.txt");
+    Open("testCreateFile.txt",1);
     return 0;
 }

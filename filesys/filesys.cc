@@ -140,6 +140,18 @@ FileSystem::FileSystem(bool format)
         freeMapFile = new OpenFile(FreeMapSector);
         directoryFile = new OpenFile(DirectorySector);
     }
+
+
+     openf = new OpenFile*[15];
+	index = 0;
+	for (int i = 0; i < 15; ++i)
+	{
+		openf[i] = NULL;
+	}
+	openf[index++] = this->Open("stdin", 2);
+	openf[index++] = this->Open("stdout", 3);
+	this->Create("stdin", 0);
+	this->Create("stdout", 0);
 }
 
 //----------------------------------------------------------------------
@@ -234,9 +246,27 @@ FileSystem::Open(char *name)
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
     if (sector >= 0) 		
-	openFile = new OpenFile(sector);	// name was found in directory 
+	openf[index] = new OpenFile(sector);	// name was found in directory 
     delete directory;
-    return openFile;				// return NULL if not found
+    index++;
+    return openf[index-1];				// return NULL if not found
+}
+
+OpenFile *
+FileSystem::Open(char *name,int type)
+{ 
+    int freeSlot= this->FindFreeSlot();
+    Directory *directory = new Directory(NumDirEntries);
+    // OpenFile *openFile = NULL;
+    int sector;
+
+    DEBUG(dbgFile, "Opening file" << name);
+    directory->FetchFrom(directoryFile);
+    sector = directory->Find(name); 
+    if (sector >= 0) 		
+	openf[freeSlot] = new OpenFile(sector, type);	// name was found in directory 
+    delete directory;
+    return openf[freeSlot];				// return NULL if not found
 }
 
 //----------------------------------------------------------------------
