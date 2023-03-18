@@ -269,8 +269,67 @@ ExceptionHandler(ExceptionType which)
 		kernel->machine->WriteRegister(2, -1);
 		break;
 	}
+	case SC_Remove:
+	{
+		int virtAddr;
+		char* filename;
+		DEBUG('a',"\n SC_Remove call ...");
+		DEBUG('a',"\n Reading virtual address of filename");
+		// Lấy tham số tên tập tin từ thanh ghi r4
+		virtAddr = kernel->machine->ReadRegister(4);
+		DEBUG ('a',"\n Reading filename.");
+		// MaxFileLength là = 32
+		filename = User2System(virtAddr,MaxFileLength+1);
+		if (filename == NULL)
+		{
+		 printf("\n Not enough memory in system");
+		 DEBUG('a',"\n Not enough memory in system");
+		 kernel->machine->WriteRegister(2,-1); // trả về lỗi cho chương
+		 // trình người dùng
+		 delete filename;
+		 return;
+		}
+		DEBUG('a',"\n Finish reading filename.");
+
+		// for(i=2,i<20;i++){
+		// 	if ((kernel->fileSystem->openf[i] = kernel->fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
+		// 		{
+		// 		kernel->machine->WriteRegister(2,-1); //tra ve OpenFileID
+		// 		printf("The file is open \n");
+		// 		}
+		// }
+		// OpenFile *file = kernel->fileSystem->Open(filename,0);
+    	// if (file == NULL) {
+        // // File does not exist, return -1
+		// printf("\n File does not exist");
+        // delete [] filename;
+        // kernel->machine->WriteRegister(2, -1);
+        // return;
+    	// }
+    	// if (file->IsOpen()) {
+        // // File is open, close it first
+		// printf("\n Closed the file '%s'",filename);
+        // file->Close();
+    	// }
 
 
+		if (!kernel->fileSystem->Remove(filename))
+		{
+		 printf("\n Error remove file '%s'",filename);
+		 kernel->machine->WriteRegister(2,-1);
+		 delete filename;
+		 return;
+		}
+		printf("remove file success \n");
+		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
+		 // người dùng thành công
+		delete filename; 
+		IncreasePC();
+		return;
+	    ASSERTNOTREACHED();
+		break;
+
+	}
 
       default:
 	cerr << "Unexpected system call " << type << "\n";
