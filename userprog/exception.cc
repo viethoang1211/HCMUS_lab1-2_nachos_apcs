@@ -121,15 +121,15 @@ void SysCall_Read(){
 	char* buf=User2System(virtAddr,charcount);
 	int ret=0;
 	if(id<0||id>19||id==1){
-		DEBUG(dbgSys_Read, "Reading invalid file or stdout.\n");
+		DEBUG("dbgSys_Read", "Reading invalid file or stdout.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else if(kernel->fileSystem->openf[id]==NULL){
-		DEBUG(dbgSys_Read, "Reading nonexistent file.\n");
+		DEBUG("dbgSys_Read", "Reading nonexistent file.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else if(id==0){
-		DEBUG(dbgSys_Read, "Reading stdin.\n");
+		DEBUG("dbgSys_Read", "Reading stdin.\n");
 		for(int i=0;i<charcount;i++){
 			char ch=kernel->synchConsoleIn->GetChar();
 			if(ch!=EOF){
@@ -141,7 +141,7 @@ void SysCall_Read(){
 		kernel->machine->WriteRegister(2,ret);
 	}
 	else{
-		DEBUG(dbgSys_Read, "Reading file.\n");
+		DEBUG("dbgSys_Read", "Reading file.\n");
 		ret=kernel->fileSystem->openf[id]->Read(buf,charcount);
 		System2User(virtAddr,ret,buf);
 		kernel->machine->WriteRegister(2,ret);
@@ -157,19 +157,19 @@ void SysCall_Write(){
 	char* buf=User2System(virtAddr,charcount);
 	int ret=0;
 	if(id<0||id>19||id==0){
-		DEBUG(dbgSys_Write, "Writing invalid file or stdin.\n");
+		DEBUG("dbgSys_Write", "Writing invalid file or stdin.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else if(kernel->fileSystem->openf[id]==NULL){
-		DEBUG(dbgSys_Write, "Writing nonexistent file.\n");
+		DEBUG("dbgSys_Write", "Writing nonexistent file.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else if(kernel->fileSystem->openf[id]->type==1){
-		DEBUG(dbgSys_Write, "Writing read-only file.\n");
+		DEBUG("dbgSys_Write", "Writing read-only file.\n");
 		kernel->machine->Writing(2,-1);
 	}
 	else if(id==1){
-		DEBUG(dbgSys_Write, "Writing stdout.\n");
+		DEBUG("dbgSys_Write", "Writing stdout.\n");
 		for(int i=0;i<charcount;i++){
 			if(buf[i]){
 			kernel->synchConsoleOut->PutChar(buf[i]);
@@ -180,7 +180,7 @@ void SysCall_Write(){
 		kernel->machine->WriteRegister(2,ret);
 	}
 	else if (kernel->fileSystem->openf[id]->type==0){
-		DEBUG(dbgSys_Write, "Writing file.\n");
+		DEBUG("dbgSys_Write", "Writing file.\n");
 		ret=kernel->fileSystem->openf[id]->Write(buf,charcount);
 		System2User(virtAddr,ret,buf);
 		kernel->machine->WriteRegister(2,ret);
@@ -194,20 +194,20 @@ void SysCall_Seek(){
 	int pos = kernel->machine->ReadRegister(4);
 	int id = kernel->machine->ReadRegister(5);
 	if(id<0||id>19){
-		DEBUG(dbgSys_Seek, "Invalid file.\n");
+		DEBUG("dbgSys_Seek", "Invalid file.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else if(id==0||id==1){
-		DEBUG(dbgSys_Seek, "Seek on console.\n");
+		DEBUG("dbgSys_Seek", "Seek on console.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else if(kernel->fileSystem->openf[id]==NULL){
-		DEBUG(dbgSys_Seek, "Non-existent file.\n");
+		DEBUG("dbgSys_Seek", "Non-existent file.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	if(pos==-1) pos = kernel->fileSystem->openf[id]->Length();
 	if(pos<0||pos>kernel->fileSystem->openf[id]->Length()){
-		DEBUG(dbgSys_Seek, "Seek out of range.\n");
+		DEBUG("dbgSys_Seek", "Seek out of range.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else {
