@@ -15,7 +15,7 @@
 
 #include "copyright.h"
 #include "errno.h"
-#include "synchconsole.h"
+// #include "synchconsole.h"
 /* system call codes -- used by the stubs to tell the kernel which system call
  * is being asked for
  */
@@ -106,8 +106,8 @@ typedef int OpenFileId;
  * the console device.
  */
 
-#define ConsoleInput	0  
-#define ConsoleOutput	1  
+// #define ConsoleInput	0  
+// #define ConsoleOutput	1  
  
 /* Create a Nachos file, with name "name" */
 /* Note: Create does not open the file.   */

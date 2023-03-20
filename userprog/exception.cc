@@ -25,7 +25,7 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
-
+#include "synchconsole.h"
 #define MaxFileLength 32 
 //----------------------------------------------------------------------
 // ExceptionHandler

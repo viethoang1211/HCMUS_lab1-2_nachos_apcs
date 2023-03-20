@@ -13,9 +13,9 @@
 
 #include "copyright.h"
 #include "utility.h"
-#include "callback.h"
-#include "console.h"
-#include "synch.h"
+#include "../machine/callback.h"
+#include "../machine/console.h"
+#include "../threads/synch.h"
 
 // The following two classes define synchronized input and output to
 // a console device

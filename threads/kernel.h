@@ -18,13 +18,13 @@
 #include "alarm.h"
 #include "filesys.h"
 #include "machine.h"
-#include "main.h"
-#include "synch.h"
-#include "synchconsole.h"
+// #include "main.h"
+// #include "synch.h"
+// #include "synchconsole.h"
 class PostOfficeInput;
 class PostOfficeOutput;
-// class SynchConsoleInput;
-// class SynchConsoleOutput;
+class SynchConsoleInput;
+class SynchConsoleOutput;
 class SynchDisk;
 
 class Kernel {
