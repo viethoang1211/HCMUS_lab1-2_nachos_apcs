@@ -26,7 +26,6 @@
 #include "syscall.h"
 #include "ksyscall.h"
 
-
 #define MaxFileLength 32 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -113,6 +112,109 @@ int System2User(int virtAddr,int len,char* buffer)
  }while(i < len && oneChar != 0);
  return i;
 } 
+
+void SysCall_Read(){
+	int virtAddr =kernel->machine->ReadRegister(4);
+	int charcount=kernel->machine->ReadRegister(5);
+	int id=kernel->machine->ReadRegister(6);
+	char* buf=User2System(virtAddr,charcount);
+	int ret=0;
+	if(id<0||id>19||id==1){
+		DEBUG('3', "Reading invalid file or stdout.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(kernel->fileSystem->openf[id]==NULL){
+		DEBUG('3', "Reading nonexistent file.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(id==0){
+		DEBUG('3', "Reading stdin.\n");
+		for(int i=0;i<charcount;i++){
+			char ch=kernel->synchConsoleIn->GetChar();
+			if(ch!=EOF){
+				buf[i]=ch;
+				ret++;
+			}
+		}
+		System2User(virtAddr,ret,buf);
+		kernel->machine->WriteRegister(2,ret);
+	}
+	else{
+		DEBUG('3', "Reading file.\n");
+		ret=kernel->fileSystem->openf[id]->Read(buf,charcount);
+		System2User(virtAddr,ret,buf);
+		kernel->machine->WriteRegister(2,ret);
+	}
+	delete buf;
+	return IncreasePC();	
+}
+
+void SysCall_Write(){
+	int virtAddr =kernel->machine->ReadRegister(4);
+	int charcount=kernel->machine->ReadRegister(5);
+	int id=kernel->machine->ReadRegister(6);
+	char* buf=User2System(virtAddr,charcount);
+	int ret=0;
+	if(id<0||id>19||id==0){
+		DEBUG('4', "Writing invalid file or stdin.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(kernel->fileSystem->openf[id]==NULL){
+		DEBUG('4', "Writing nonexistent file.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(kernel->fileSystem->openf[id]->type==1){
+		DEBUG('4', "Writing read-only file.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(id==1){
+		DEBUG('4', "Writing stdout.\n");
+		for(int i=0;i<charcount;i++){
+			if(buf[i]){
+			kernel->synchConsoleOut->PutChar(buf[i]);
+			ret++;
+			}
+		}
+		System2User(virtAddr,ret,buf);
+		kernel->machine->WriteRegister(2,ret);
+	}
+	else if (kernel->fileSystem->openf[id]->type==0){
+		DEBUG('4', "Writing file.\n");
+		ret=kernel->fileSystem->openf[id]->Write(buf,charcount);
+		System2User(virtAddr,ret,buf);
+		kernel->machine->WriteRegister(2,ret);
+	}
+	delete buf;
+	return IncreasePC();
+	
+}
+
+void SysCall_Seek(){
+	int pos = kernel->machine->ReadRegister(4);
+	int id = kernel->machine->ReadRegister(5);
+	if(id<0||id>19){
+		DEBUG('5', "Invalid file.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(id==0||id==1){
+		DEBUG('5', "Seek on console.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(kernel->fileSystem->openf[id]==NULL){
+		DEBUG('5', "Non-existent file.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	if(pos==-1) pos = kernel->fileSystem->openf[id]->Length();
+	if(pos<0||pos>kernel->fileSystem->openf[id]->Length()){
+		DEBUG('5', "Seek out of range.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else {
+		kernel->fileSystem->openf[id]->Seek(pos);
+		kernel->machine->WriteRegister(2,pos);
+	}
+	return IncreasePC();
+}
 
 void
 ExceptionHandler(ExceptionType which)
@@ -272,8 +374,79 @@ ExceptionHandler(ExceptionType which)
 		kernel->machine->WriteRegister(2, -1);
 		break;
 	}
+	case SC_Read:
+	{
+		return SysCall_Read();
+	}
+	case SC_Write:
+	{
+		return SysCall_Write();
+	}
+	case SC_Seek:
+	{
+		return SysCall_Seek();
+	}
+	case SC_Remove:
+	{
+		int virtAddr;
+		char* filename;
+		DEBUG('a',"\n SC_Remove call ...");
+		DEBUG('a',"\n Reading virtual address of filename");
+		// Lấy tham số tên tập tin từ thanh ghi r4
+		virtAddr = kernel->machine->ReadRegister(4);
+		DEBUG ('a',"\n Reading filename.");
+		// MaxFileLength là = 32
+		filename = User2System(virtAddr,MaxFileLength+1);
+		if (filename == NULL)
+		{
+		 printf("\n Not enough memory in system");
+		 DEBUG('a',"\n Not enough memory in system");
+		 kernel->machine->WriteRegister(2,-1); // trả về lỗi cho chương
+		 // trình người dùng
+		 delete filename;
+		 return;
+		}
+		DEBUG('a',"\n Finish reading filename.");
+
+		// for(i=2,i<20;i++){
+		// 	if ((kernel->fileSystem->openf[i] = kernel->fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
+		// 		{
+		// 		kernel->machine->WriteRegister(2,-1); //tra ve OpenFileID
+		// 		printf("The file is open \n");
+		// 		}
+		// }
+		// OpenFile *file = kernel->fileSystem->Open(filename,0);
+    	// if (file == NULL) {
+        // // File does not exist, return -1
+		// printf("\n File does not exist");
+        // delete [] filename;
+        // kernel->machine->WriteRegister(2, -1);
+        // return;
+    	// }
+    	// if (file->IsOpen()) {
+        // // File is open, close it first
+		// printf("\n Closed the file '%s'",filename);
+        // file->Close();
+    	// }
 
 
+		if (!kernel->fileSystem->Remove(filename))
+		{
+		 printf("\n Error remove file '%s'",filename);
+		 kernel->machine->WriteRegister(2,-1);
+		 delete filename;
+		 return;
+		}
+		printf("remove file success \n");
+		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
+		 // người dùng thành công
+		delete filename; 
+		IncreasePC();
+		return;
+	    ASSERTNOTREACHED();
+		break;
+
+	}
 
       default:
 	cerr << "Unexpected system call " << type << "\n";

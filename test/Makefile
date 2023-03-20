@@ -164,6 +164,11 @@ createFile: createFile.o start.o
 	$(LD) $(LDFLAGS) start.o createFile.o -o createFile.coff
 	$(COFF2NOFF) createFile.coff createFile
 
+removeFile.o: removeFile.c
+	$(CC) $(CFLAGS) -c removeFile.c
+removeFile: removeFile.o start.o
+	$(LD) $(LDFLAGS) start.o removeFile.o -o removeFile.coff
+	$(COFF2NOFF) removeFile.coff removeFile
 
 clean:
 	$(RM) -f *.o *.ii
