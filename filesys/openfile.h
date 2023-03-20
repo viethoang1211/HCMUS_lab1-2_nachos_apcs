@@ -31,9 +31,10 @@ class OpenFile {
   public:
 
 	int type;
+	char name1[32];
 
     OpenFile(int f) { file = f; currentOffset = 0;type=0; }	// open the file
-    OpenFile(int f,int t) { file = f; currentOffset = 0;type=t; }	// open the file type t
+    OpenFile(int f,int t, char * name) { file = f; currentOffset = 0;type=t; strcpy(name1,name); }	// open the file type t
 
     ~OpenFile() { Close(file); }			// close the file
 
@@ -76,11 +77,13 @@ class OpenFile {
 	//type 1: read only
 	//type2 : console in
 	//type 3: console out
-	
+	char name[32];
+
+
     OpenFile(int sector);		// Open a file whose header is located
 					// at "sector" on the disk
 
-    OpenFile(int sector,int type);		// Open a file whose header is located
+    OpenFile(int sector,int type, char*name);		// Open a file whose header is located
 	
     ~OpenFile();			// Close the file
 

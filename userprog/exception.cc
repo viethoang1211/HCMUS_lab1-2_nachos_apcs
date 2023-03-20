@@ -231,6 +231,9 @@ ExceptionHandler(ExceptionType which)
 					if ((kernel->fileSystem->openf[freeSlot] = kernel->fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
 					{
 						kernel->machine->WriteRegister(2, freeSlot); //tra ve OpenFileID
+						// printf("%d",freeSlot); //e);
+						// printf("%s",kernel->fileSystem->openf[freeSlot]->name1); //)
+
 						printf("Open file success \n");
 					}
 				}

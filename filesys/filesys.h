@@ -1,4 +1,4 @@
-// filesys.h 
+	// filesys.h 
 //	Data structures to represent the Nachos file system.
 //
 //	A file system is a set of files stored on disk, organized
@@ -78,7 +78,7 @@ class FileSystem {
 
 	  if (fileDescriptor == -1) return NULL;
 	  index++;
-	  return new OpenFile(fileDescriptor,type);
+	  return new OpenFile(fileDescriptor,type,name);
       }
 
 

@@ -142,7 +142,7 @@ FileSystem::FileSystem(bool format)
     }
 
 
-     openf = new OpenFile*[15];
+     openf = new OpenFile*[20];
 	index = 0;
 	for (int i = 0; i < 15; ++i)
 	{
@@ -264,7 +264,7 @@ FileSystem::Open(char *name,int type)
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
     if (sector >= 0) 		
-	openf[freeSlot] = new OpenFile(sector, type);	// name was found in directory 
+	openf[freeSlot] = new OpenFile(sector, type,name);	// name was found in directory 
     delete directory;
     return openf[freeSlot];				// return NULL if not found
 }

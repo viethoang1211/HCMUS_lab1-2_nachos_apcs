@@ -33,10 +33,11 @@ OpenFile::OpenFile(int sector)
     seekPosition = 0;
     type=0;
 }
-OpenFile::OpenFile(int sector,int type)
+OpenFile::OpenFile(int sector,int type,char * name)
 { 
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
+    strcpy(name1,name);
     seekPosition = 0;
     this->type = type;
 }
