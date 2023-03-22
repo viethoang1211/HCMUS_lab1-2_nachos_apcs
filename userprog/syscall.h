@@ -15,7 +15,7 @@
 
 #include "copyright.h"
 #include "errno.h"
-// #include "synchconsole.h"
+#define string_length 255
 /* system call codes -- used by the stubs to tell the kernel which system call
  * is being asked for
  */
