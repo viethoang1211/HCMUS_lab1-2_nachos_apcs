@@ -26,6 +26,15 @@
 #include "syscall.h"
 #include "ksyscall.h"
 #include "synchconsole.h"
+#include "sysdep.h"
+
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#define PORT 8080
+
 #define MaxFileLength 32 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -215,6 +224,51 @@ void SysCall_Seek(){
 	}
 	return IncreasePC();
 }
+int Syscall_SocketTCP(){
+	return OpenSocket(); //just don't ask
+}
+int Syscall_Connect(){
+	int socketid =kernel->machine->ReadRegister(4);
+	int virtAddr=kernel->machine->ReadRegister(5);
+	int port=kernel->machine->ReadRegister(6);
+	char* ip = User2System(virtAddr,MaxFileLength+1);
+	struct sockaddr_in serv_addr;
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port);
+	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)
+		<= 0) {
+		printf(
+			"\nInvalid address/ Address not supported \n");
+		return -1;
+	}
+	int status;
+	if ((status= connect(socketid, (struct sockaddr*)&serv_addr,sizeof(serv_addr)))< 0) {
+			printf("\nConnection Failed \n");
+			return -1;
+		}
+		return 0;
+	}
+
+int Syscall_Send(){
+	int socketid =kernel->machine->ReadRegister(4);
+	int virtAddr=kernel->machine->ReadRegister(5);
+	int len=kernel->machine->ReadRegister(6);
+	char* buffer = User2System(virtAddr,MaxFileLength+1);
+	send(socketid, buffer, len, 0);
+	return 0;
+	}
+
+int Syscall_Receive(int socketid, char *buffer, int len){
+	int socketid =kernel->machine->ReadRegister(4);
+	int virtAddr=kernel->machine->ReadRegister(5);
+	int len=kernel->machine->ReadRegister(6);
+	char* buffer = User2System(virtAddr,MaxFileLength+1);
+	int res = read(socketid, buffer, len);
+	return res;
+	}
+int Syscall_Close(){
+	
+}
 
 void
 ExceptionHandler(ExceptionType which)
@@ -303,10 +357,7 @@ ExceptionHandler(ExceptionType which)
 		delete filename; 
 		IncreasePC();
 		return;
-
 	    ASSERTNOTREACHED();
-
-
 		break;
 	}
 
@@ -407,29 +458,6 @@ ExceptionHandler(ExceptionType which)
 		 return;
 		}
 		DEBUG('a',"\n Finish reading filename.");
-
-		// for(i=2,i<20;i++){
-		// 	if ((kernel->fileSystem->openf[i] = kernel->fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
-		// 		{
-		// 		kernel->machine->WriteRegister(2,-1); //tra ve OpenFileID
-		// 		printf("The file is open \n");
-		// 		}
-		// }
-		// OpenFile *file = kernel->fileSystem->Open(filename,0);
-    	// if (file == NULL) {
-        // // File does not exist, return -1
-		// printf("\n File does not exist");
-        // delete [] filename;
-        // kernel->machine->WriteRegister(2, -1);
-        // return;
-    	// }
-    	// if (file->IsOpen()) {
-        // // File is open, close it first
-		// printf("\n Closed the file '%s'",filename);
-        // file->Close();
-    	// }
-
-
 		if (!kernel->fileSystem->Remove(filename))
 		{
 		 printf("\n Error remove file '%s'",filename);
@@ -445,6 +473,22 @@ ExceptionHandler(ExceptionType which)
 		return;
 	    ASSERTNOTREACHED();
 		break;
+
+	}
+	case SC_SocketTCP:
+	{
+	
+	}
+	case SC_Connect:
+	{
+
+	}
+	case SC_Send:
+	{
+
+	}
+	case SC_Receive:
+	{
 
 	}
 

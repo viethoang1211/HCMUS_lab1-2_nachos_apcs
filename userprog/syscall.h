@@ -35,7 +35,11 @@
 #define SC_ExecV	13
 #define SC_ThreadExit   14
 #define SC_ThreadJoin   15
-
+#define SC_SocketTCP    16
+#define SC_Connect      17
+#define SC_Send         18
+#define SC_Receive      19
+#define SC_SocketClose  20
 #define SC_Add		42
 
 #ifndef IN_ASM
@@ -146,7 +150,10 @@ int Seek(int position, OpenFileId id);
  */
 int Close(OpenFileId id);
 
-
+int SocketTCP();
+int Connect(int socketid, char *ip, int port);
+int Send(int socketid, char *buffer, int len);
+int Receive(int socketid, char *buffer, int len);
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 
  *
