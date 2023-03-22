@@ -123,10 +123,6 @@ void SysCall_Read(){
 		DEBUG('3', "Reading invalid file or stdout.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
-	else if(kernel->fileSystem->openf[id]==NULL){
-		DEBUG('3', "Reading nonexistent file.\n");
-		kernel->machine->WriteRegister(2,-1);
-	}
 	else if(id==0){
 		DEBUG('3', "Reading stdin.\n");
 		for(int i=0;i<charcount;i++){
@@ -135,9 +131,16 @@ void SysCall_Read(){
 				buf[i]=ch;
 				ret++;
 			}
+			if(ch=='\0'||ch=='\n'){
+				break;
+			}
 		}
 		System2User(virtAddr,ret,buf);
 		kernel->machine->WriteRegister(2,ret);
+	}
+	else if(kernel->fileSystem->openf[id]==NULL){
+		DEBUG('3', "Reading nonexistent file.\n");
+		kernel->machine->WriteRegister(2,-1);
 	}
 	else{
 		DEBUG('3', "Reading file.\n");
@@ -159,14 +162,6 @@ void SysCall_Write(){
 		DEBUG('4', "Writing invalid file or stdin.\n");
 		kernel->machine->WriteRegister(2,-1);
 	}
-	else if(kernel->fileSystem->openf[id]==NULL){
-		DEBUG('4', "Writing nonexistent file.\n");
-		kernel->machine->WriteRegister(2,-1);
-	}
-	else if(kernel->fileSystem->openf[id]->type==1){
-		DEBUG('4', "Writing read-only file.\n");
-		kernel->machine->WriteRegister(2,-1);
-	}
 	else if(id==1){
 		DEBUG('4', "Writing stdout.\n");
 		for(int i=0;i<charcount;i++){
@@ -178,6 +173,14 @@ void SysCall_Write(){
 		System2User(virtAddr,ret,buf);
 		kernel->machine->WriteRegister(2,ret);
 	}
+	else if(kernel->fileSystem->openf[id]==NULL){
+		DEBUG('4', "Writing nonexistent file.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	else if(kernel->fileSystem->openf[id]->type==1){
+		DEBUG('4', "Writing read-only file.\n");
+		kernel->machine->WriteRegister(2,-1);
+	}
 	else if (kernel->fileSystem->openf[id]->type==0){
 		DEBUG('4', "Writing file.\n");
 		ret=kernel->fileSystem->openf[id]->Write(buf,charcount);
@@ -186,7 +189,6 @@ void SysCall_Write(){
 	}
 	delete buf;
 	return IncreasePC();
-	
 }
 
 void SysCall_Seek(){
@@ -449,16 +451,15 @@ ExceptionHandler(ExceptionType which)
 	}
 
       default:
-	cerr << "Unexpected system call " << type << "\n";
-	break;
+		cerr << "Unexpected system call " << type << "\n";
+		break;
       }
       break;
     default:
-      cerr << "Unexpected user mode exception" << (int)which << "\n";
+      cerr << "Unexpected user mode exception " << (int)which << "\n";
       break;
     }
 	// IncreasePC();
     ASSERTNOTREACHED();
-	
 }
 // hi
