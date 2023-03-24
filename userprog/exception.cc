@@ -133,18 +133,21 @@ void SysCall_Read(){
 		kernel->machine->WriteRegister(2,-1);
 	}
 	else if(id==0){
+		// buf= new char[MaxFileLength];
+		// buf=User2System(virtAddr,charcount);
 		DEBUG('3', "Reading stdin.\n");
 		for(int i=0;i<charcount;i++){
 			char ch=kernel->synchConsoleIn->GetChar();
-			if(ch!=EOF){
+			if(ch!=EOF && ch!='\0'&& ch != '\n'){
 				buf[i]=ch;
 				ret++;
 			}
-			if(ch=='\0'||ch=='\n'){
+			else{
 				break;
 			}
 		}
-		System2User(virtAddr,ret,buf);
+		buf[ret]='\0';
+		System2User(virtAddr,ret+1,buf);
 		kernel->machine->WriteRegister(2,ret);
 	}
 	else if(kernel->fileSystem->openf[id]==NULL){
@@ -157,7 +160,7 @@ void SysCall_Read(){
 		System2User(virtAddr,ret,buf);
 		kernel->machine->WriteRegister(2,ret);
 	}
-	delete buf;
+	delete[] buf;
 	return IncreasePC();	
 }
 
@@ -165,7 +168,7 @@ void SysCall_Write(){
 	int virtAddr =kernel->machine->ReadRegister(4);
 	int charcount=kernel->machine->ReadRegister(5);
 	int id=kernel->machine->ReadRegister(6);
-	char* buf=User2System(virtAddr,charcount);
+	char* buf=User2System(virtAddr,charcount);;
 	int ret=0;
 	if(id<0||id>19||id==0){
 		DEBUG('4', "Writing invalid file or stdin.\n");
@@ -174,10 +177,9 @@ void SysCall_Write(){
 	else if(id==1){
 		DEBUG('4', "Writing stdout.\n");
 		for(int i=0;i<charcount;i++){
-			if(buf[i]){
+			if(buf[i]=='\0' ) break;
 			kernel->synchConsoleOut->PutChar(buf[i]);
 			ret++;
-			}
 		}
 		System2User(virtAddr,ret,buf);
 		kernel->machine->WriteRegister(2,ret);
@@ -196,7 +198,7 @@ void SysCall_Write(){
 		System2User(virtAddr,ret,buf);
 		kernel->machine->WriteRegister(2,ret);
 	}
-	delete buf;
+	delete[] buf;
 	return IncreasePC();
 }
 
@@ -226,6 +228,7 @@ void SysCall_Seek(){
 	}
 	return IncreasePC();
 }
+
 int Syscall_SocketTCP(){
 	int sockid = socket(AF_INET, SOCK_STREAM, 0);
     if (sockid < 0) {
@@ -350,7 +353,7 @@ ExceptionHandler(ExceptionType which)
 		 DEBUG('a',"\n Not enough memory in system");
 		 kernel->machine->WriteRegister(2,-1); // trả về lỗi cho chương
 		 // trình người dùng
-		 delete filename;
+		 delete[] filename;
 		 return;
 		}
 		DEBUG('a',"\n Finish reading filename.");
@@ -358,13 +361,13 @@ ExceptionHandler(ExceptionType which)
 		{
 		 printf("\n Error create file '%s'",filename);
 		 kernel->machine->WriteRegister(2,-1);
-		 delete filename;
+		 delete[] filename;
 		 return;
 		}
 		printf("Create file success \n");
 		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
 		 // người dùng thành công
-		delete filename; 
+		delete[] filename; 
 		IncreasePC();
 		return;
 	    ASSERTNOTREACHED();
@@ -464,7 +467,7 @@ ExceptionHandler(ExceptionType which)
 		 DEBUG('a',"\n Not enough memory in system");
 		 kernel->machine->WriteRegister(2,-1); // trả về lỗi cho chương
 		 // trình người dùng
-		 delete filename;
+		 delete[] filename;
 		 return;
 		}
 		DEBUG('a',"\n Finish reading filename.");
@@ -472,13 +475,13 @@ ExceptionHandler(ExceptionType which)
 		{
 		 printf("\n Error remove file '%s'",filename);
 		 kernel->machine->WriteRegister(2,-1);
-		 delete filename;
+		 delete[] filename;
 		 return;
 		}
 		printf("remove file success \n");
 		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
 		 // người dùng thành công
-		delete filename; 
+		delete[] filename; 
 		IncreasePC();
 		return;
 	    ASSERTNOTREACHED();
