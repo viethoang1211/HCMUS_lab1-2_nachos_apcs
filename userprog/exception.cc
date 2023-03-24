@@ -230,12 +230,12 @@ void SysCall_Seek(){
 }
 
 int Syscall_SocketTCP(){
-	int sockid = socket(AF_INET, SOCK_STREAM, 0);
+	int socketid = socket(AF_INET, SOCK_STREAM, 0);
     if (sockid < 0) {
         printf("socket creation failed");
-        return -1;
+        kernel->machine->WriteRegister(2,-1);
     }
-	return sockid;
+	 kernel->machine->WriteRegister(2,socketid);
 }
 int Syscall_Connect(){
 	int socketid =kernel->machine->ReadRegister(4);
@@ -247,14 +247,14 @@ int Syscall_Connect(){
 	serv_addr.sin_port = htons(port);
 	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)<= 0) {
 		printf("\nInvalid address/ Address not supported \n");
-		return -1;
+		kernel->machine->WriteRegister(2,-1);
 	}
 	int status;
 	if ((status= connect(socketid, (struct sockaddr*)&serv_addr,sizeof(serv_addr)))< 0) {
 			printf("\nConnection Failed \n");
-			return -1;
+			kernel->machine->WriteRegister(2,-1);
 		}
-		return 0;
+		kernel->machine->WriteRegister(2,0);
 	}
 
 int Syscall_Send(){
@@ -262,8 +262,13 @@ int Syscall_Send(){
 	int virtAddr=kernel->machine->ReadRegister(5);
 	int len=kernel->machine->ReadRegister(6);
 	char* buffer = User2System(virtAddr,MaxFileLength+1);
-	send(socketid, buffer, len, 0);
-	return 0;
+	int bytes_sent = send(socketid, buffer, len, 0);
+	if (bytes_sent == 0) {
+    kernel->machine->WriteRegister(2,0); // Connection closed
+    } else if (bytes_sent < 0) {
+    kernel->machine->WriteRegister(2,-1); // Error
+    }
+    kernel->machine->WriteRegister(2,bytes_sent);
 	}
 
 int Syscall_Receive(){
@@ -271,16 +276,21 @@ int Syscall_Receive(){
 	int virtAddr=kernel->machine->ReadRegister(5);
 	int len=kernel->machine->ReadRegister(6);
 	char* buffer = User2System(virtAddr,MaxFileLength+1);
-	int res = read(socketid, buffer, len);
-	return res;
+	int bytes_received = recv(socketid, buffer, len,0);
+	if (bytes_received == 0) {
+    kernel->machine->WriteRegister(2,0); // Connection closed
+    } else if (bytes_received < 0)
+    kernel->machine->WriteRegister(2,-1); // Error 
+
+    kernel->machine->WriteRegister(2,bytes_received);
 	}
 int Syscall_Close(){
 	int socketid =kernel->machine->ReadRegister(4);
 	if (close(socketid) < 0) {
     printf("socket Close failed");
-    return -1;
+    kernel->machine->WriteRegister(2,-1);
     }
-	return 0;
+	kernel->machine->WriteRegister(2,0);
 }
 
 void
@@ -469,6 +479,15 @@ ExceptionHandler(ExceptionType which)
 		 // trình người dùng
 		 delete[] filename;
 		 return;
+		}
+		for(int i=2;i<20;i++){
+			if(kernel->fileSystem->openf[i]]->name == filename){
+			printf("\n The file is open");
+		 	DEBUG('a',"\n The file is open");
+		 	kernel->machine->WriteRegister(2,-1); 
+		 	delete[] filename;
+		 	return;
+			}
 		}
 		DEBUG('a',"\n Finish reading filename.");
 		if (!kernel->fileSystem->Remove(filename))
