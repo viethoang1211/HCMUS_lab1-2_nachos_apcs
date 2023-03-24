@@ -227,7 +227,12 @@ void SysCall_Seek(){
 	return IncreasePC();
 }
 int Syscall_SocketTCP(){
-	return OpenSocket(); //just don't ask
+	int sockid = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockid < 0) {
+        printf("socket creation failed");
+        return -1;
+    }
+	return sockid;
 }
 int Syscall_Connect(){
 	int socketid =kernel->machine->ReadRegister(4);
@@ -237,10 +242,8 @@ int Syscall_Connect(){
 	struct sockaddr_in serv_addr;
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(port);
-	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)
-		<= 0) {
-		printf(
-			"\nInvalid address/ Address not supported \n");
+	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)<= 0) {
+		printf("\nInvalid address/ Address not supported \n");
 		return -1;
 	}
 	int status;
@@ -260,7 +263,7 @@ int Syscall_Send(){
 	return 0;
 	}
 
-int Syscall_Receive(int socketid, char *buffer, int len){
+int Syscall_Receive(){
 	int socketid =kernel->machine->ReadRegister(4);
 	int virtAddr=kernel->machine->ReadRegister(5);
 	int len=kernel->machine->ReadRegister(6);
@@ -269,7 +272,12 @@ int Syscall_Receive(int socketid, char *buffer, int len){
 	return res;
 	}
 int Syscall_Close(){
-	
+	int socketid =kernel->machine->ReadRegister(4);
+	if (close(socketid) < 0) {
+    printf("socket Close failed");
+    return -1;
+    }
+	return 0;
 }
 
 void
