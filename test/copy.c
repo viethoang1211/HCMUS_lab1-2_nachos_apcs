@@ -21,7 +21,8 @@ int main(int x, char* argv[]){
         
         Write("Input destination filename: ",string_length,1);
         Read(des,string_length,0);
-
+        Create(des);
+        
         if((id_des = Open(des,0))==-1){
             Write("Open des failed\n",string_length,1);
         }  
