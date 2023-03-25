@@ -434,12 +434,18 @@ ExceptionHandler(ExceptionType which)
 		 return IncreasePC();
 		}
 		for(int i=2;i<20;i++){
-			if( strcmp(kernel->fileSystem->openf[i]->name1, filename)==0){
-			printf("\n The file is open");
-		 	DEBUG('a',"\n The file is open");
-		 	kernel->machine->WriteRegister(2,-1); 
-		 	delete[] filename;
-		 	return IncreasePC();
+			if (kernel->fileSystem->openf[i]!= NULL){
+				if (kernel->fileSystem->openf[i]->type==1||kernel->fileSystem->openf[i]->type==0){
+					if (strlen(kernel->fileSystem->openf[i]->name1)!=0){
+						if( strcmp(kernel->fileSystem->openf[i]->name1, filename)==0){
+						printf("The file is open\n");
+		 				DEBUG('a',"\n The file is open");	
+		 				kernel->machine->WriteRegister(2,-1); 
+		 				delete[] filename;
+		 				return IncreasePC();
+						}
+					}
+				}
 			}
 		}
 		DEBUG('a',"\n Finish reading filename.");
