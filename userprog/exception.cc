@@ -229,69 +229,28 @@ void SysCall_Seek(){
 	return IncreasePC();
 }
 
-int Syscall_SocketTCP(){
-	int socketid = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockid < 0) {
-        printf("socket creation failed");
-        kernel->machine->WriteRegister(2,-1);
-    }
-	 kernel->machine->WriteRegister(2,socketid);
-}
-int Syscall_Connect(){
-	int socketid =kernel->machine->ReadRegister(4);
-	int virtAddr=kernel->machine->ReadRegister(5);
-	int port=kernel->machine->ReadRegister(6);
-	char* ip = User2System(virtAddr,MaxFileLength+1);
-	struct sockaddr_in serv_addr;
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(port);
-	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)<= 0) {
-		printf("\nInvalid address/ Address not supported \n");
-		kernel->machine->WriteRegister(2,-1);
-	}
-	int status;
-	if ((status= connect(socketid, (struct sockaddr*)&serv_addr,sizeof(serv_addr)))< 0) {
-			printf("\nConnection Failed \n");
-			kernel->machine->WriteRegister(2,-1);
-		}
-		kernel->machine->WriteRegister(2,0);
-	}
+// int Syscall_SocketTCP(){
 
-int Syscall_Send(){
-	int socketid =kernel->machine->ReadRegister(4);
-	int virtAddr=kernel->machine->ReadRegister(5);
-	int len=kernel->machine->ReadRegister(6);
-	char* buffer = User2System(virtAddr,MaxFileLength+1);
-	int bytes_sent = send(socketid, buffer, len, 0);
-	if (bytes_sent == 0) {
-    kernel->machine->WriteRegister(2,0); // Connection closed
-    } else if (bytes_sent < 0) {
-    kernel->machine->WriteRegister(2,-1); // Error
-    }
-    kernel->machine->WriteRegister(2,bytes_sent);
-	}
 
-int Syscall_Receive(){
-	int socketid =kernel->machine->ReadRegister(4);
-	int virtAddr=kernel->machine->ReadRegister(5);
-	int len=kernel->machine->ReadRegister(6);
-	char* buffer = User2System(virtAddr,MaxFileLength+1);
-	int bytes_received = recv(socketid, buffer, len,0);
-	if (bytes_received == 0) {
-    kernel->machine->WriteRegister(2,0); // Connection closed
-    } else if (bytes_received < 0)
-    kernel->machine->WriteRegister(2,-1); // Error 
+// }
+// int Syscall_Connect(){
 
-    kernel->machine->WriteRegister(2,bytes_received);
-	}
-int Syscall_Close(){
-	int socketid =kernel->machine->ReadRegister(4);
-	if (close(socketid) < 0) {
-    printf("socket Close failed");
-    kernel->machine->WriteRegister(2,-1);
-    }
-	kernel->machine->WriteRegister(2,0);
-}
+// 	return IncreasePC();
+// 	}
+
+// int Syscall_Send(){
+
+// 	return IncreasePC();
+// 	}
+
+// int Syscall_Receive(){
+
+// 	return IncreasePC();
+// 	}
+// int Syscall_CloseSocketTCP(){
+
+// 	return IncreasePC();
+// }
 
 void
 ExceptionHandler(ExceptionType which)
@@ -481,7 +440,7 @@ ExceptionHandler(ExceptionType which)
 		 return;
 		}
 		for(int i=2;i<20;i++){
-			if(kernel->fileSystem->openf[i]]->name == filename){
+			if(kernel->fileSystem->openf[i]->name == filename){
 			printf("\n The file is open");
 		 	DEBUG('a',"\n The file is open");
 		 	kernel->machine->WriteRegister(2,-1); 
@@ -509,19 +468,92 @@ ExceptionHandler(ExceptionType which)
 	}
 	case SC_SocketTCP:
 	{
-	
+	int socketid = socket(AF_INET, SOCK_STREAM, 0);
+    if (socketid < 0) {
+        printf("socket creation failed");
+        kernel->machine->WriteRegister(2,-1);
+    }
+	kernel->machine->WriteRegister(2,socketid);
+	IncreasePC();
+	return;
+	ASSERTNOTREACHED();
+	break;
 	}
 	case SC_Connect:
 	{
-
+	int socketid =kernel->machine->ReadRegister(4);
+	int virtAddr=kernel->machine->ReadRegister(5);
+	int port=kernel->machine->ReadRegister(6);
+	char* ip = User2System(virtAddr,MaxFileLength+1);
+	struct sockaddr_in serv_addr;
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port);
+	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)<= 0) {
+		printf("\nInvalid address/ Address not supported \n");
+		kernel->machine->WriteRegister(2,-1);
+	}
+	int status;
+	if ((status= connect(socketid, (struct sockaddr*)&serv_addr,sizeof(serv_addr)))< 0) {
+			printf("\nConnection Failed \n");
+			kernel->machine->WriteRegister(2,-1);
+		}
+	kernel->machine->WriteRegister(2,0);
+	delete[] ip; 
+	IncreasePC();
+	return;
+	ASSERTNOTREACHED();
+	break;
 	}
 	case SC_Send:
 	{
-
+	int socketid =kernel->machine->ReadRegister(4);
+	int virtAddr=kernel->machine->ReadRegister(5);
+	int len=kernel->machine->ReadRegister(6);
+	char* buffer = User2System(virtAddr,MaxFileLength+1);
+	int bytes_sent = send(socketid, buffer, len, 0);
+	if (bytes_sent == 0) {
+    kernel->machine->WriteRegister(2,0); // Connection closed
+    } else if (bytes_sent < 0) {
+    kernel->machine->WriteRegister(2,-1); // Error
+    }
+    kernel->machine->WriteRegister(2,bytes_sent);
+	delete[] buffer;
+	IncreasePC();
+	return;
+	ASSERTNOTREACHED();
+	break;
 	}
 	case SC_Receive:
 	{
-
+	int socketid =kernel->machine->ReadRegister(4);
+	int virtAddr=kernel->machine->ReadRegister(5);
+	int len=kernel->machine->ReadRegister(6);
+	char* buffer = User2System(virtAddr,MaxFileLength+1);
+	int bytes_received = recv(socketid, buffer, len,0);
+	if (bytes_received == 0) {
+    kernel->machine->WriteRegister(2,0); // Connection closed
+    } else if (bytes_received < 0){
+    kernel->machine->WriteRegister(2,-1);
+	} // Error 
+    kernel->machine->WriteRegister(2,bytes_received);
+	delete[] buffer;
+	IncreasePC();
+	return;
+	ASSERTNOTREACHED();
+	break;
+	}
+	case SC_CloseSocketTCP:
+	{
+	int socketid =kernel->machine->ReadRegister(4);
+	if (close(socketid) < 0) {
+    printf("socket Close failed");
+    kernel->machine->WriteRegister(2,-1);
+    }
+	kernel->machine->WriteRegister(2,0);
+	IncreasePC();
+	return;
+	ASSERTNOTREACHED();
+	break;
 	}
 
       default:
