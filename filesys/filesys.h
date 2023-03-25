@@ -36,6 +36,7 @@
 #include "copyright.h"
 #include "sysdep.h"
 #include "openfile.h"
+#include "filetable.h"
 
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
@@ -45,8 +46,9 @@ class FileSystem {
 	OpenFile **openf;
 	int index;
 
+	// FileTable** FileTable;
     FileSystem(bool format) {
-		openf = new OpenFile*[15];
+		openf = new OpenFile*[20];
 		index = 0;
 		for (int i = 0; i < 15; ++i)
 		{

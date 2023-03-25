@@ -41,6 +41,12 @@ OpenFile::OpenFile(int sector,int type,char * name)
     seekPosition = 0;
     this->type = type;
 }
+OpenFile::OpenFile(int socketID,int type)
+{
+    sID = socketID;
+    this->type = type;
+}
+
 //----------------------------------------------------------------------
 // OpenFile::~OpenFile
 // 	Close a Nachos file, de-allocating any in-memory data structures.
