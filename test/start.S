@@ -180,14 +180,13 @@ Receive:
 
 	.globl CloseSocketTCP
 	.ent	CloseSocketTCP
-Close:
-	addiu $2,$0,SC_CloseSocket
+CloseSocketTCP:
+	addiu $2,$0,SC_CloseSocketTCP
 	syscall
 	j	$31
 	.end CloseSocketTCP
 
-
-
+	
         .globl ThreadFork
         .ent    ThreadFork
 ThreadFork:

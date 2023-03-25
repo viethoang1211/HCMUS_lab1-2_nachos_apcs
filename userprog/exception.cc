@@ -352,11 +352,11 @@ ExceptionHandler(ExceptionType which)
 			//OpenFileID Open(char *name, int type)
 			int virtAddr = kernel->machine->ReadRegister(4); // Lay dia chi cua tham so name tu thanh ghi so 4
 			int type = kernel->machine->ReadRegister(5); // Lay tham so type tu thanh ghi so 5
+			// 0 for read and 1 for read and write
+
 			char* filename;
 			filename = User2System(virtAddr, MaxFileLength); // Copy chuoi tu vung nho User Space sang System Space voi bo dem name dai MaxFileLength
-			//Kiem tra xem OS con mo dc file khong
-			
-			// update 4/1/2018
+
 			int freeSlot = kernel->fileSystem->FindFreeSlot();
 			if (freeSlot != -1) //Chi xu li khi con slot trong
 			{
@@ -366,9 +366,6 @@ ExceptionHandler(ExceptionType which)
 					if ((kernel->fileSystem->openf[freeSlot] = kernel->fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
 					{
 						kernel->machine->WriteRegister(2, freeSlot); //tra ve OpenFileID
-						// printf("%d",freeSlot); //e);
-						// printf("%s",kernel->fileSystem->openf[freeSlot]->name1); //)
-
 						printf("Open file success \n");
 					}
 				}
@@ -377,10 +374,10 @@ ExceptionHandler(ExceptionType which)
 					kernel->machine->WriteRegister(2, -1); 
 				}
 				delete[] filename;
-
 				IncreasePC();
 				break;
-			}
+			}				
+				
 			kernel->machine->WriteRegister(2, -1); //Khong mo duoc file return -1
 			
 			delete[] filename;
@@ -440,7 +437,7 @@ ExceptionHandler(ExceptionType which)
 		 return;
 		}
 		for(int i=2;i<20;i++){
-			if(kernel->fileSystem->openf[i]->name == filename){
+			if(kernel->fileSystem->openf[i]->name1 == filename){
 			printf("\n The file is open");
 		 	DEBUG('a',"\n The file is open");
 		 	kernel->machine->WriteRegister(2,-1); 
@@ -468,12 +465,23 @@ ExceptionHandler(ExceptionType which)
 	}
 	case SC_SocketTCP:
 	{
+
+	int freeSlot = kernel->fileSystem->FindFreeSlot();
+	if (freeSlot>= 2 && freeSlot<=19){
 	int socketid = socket(AF_INET, SOCK_STREAM, 0);
     if (socketid < 0) {
         printf("socket creation failed");
         kernel->machine->WriteRegister(2,-1);
     }
-	kernel->machine->WriteRegister(2,socketid);
+	else{
+		kernel->machine->WriteRegister(2,socketid);
+		kernel->fileSystem->openf[freeSlot] = new OpenFile(socketid,4);
+	}
+	}
+	else {
+		kernel->machine->WriteRegister(2,-1);
+	}
+
 	IncreasePC();
 	return;
 	ASSERTNOTREACHED();
@@ -544,12 +552,22 @@ ExceptionHandler(ExceptionType which)
 	}
 	case SC_CloseSocketTCP:
 	{
+
 	int socketid =kernel->machine->ReadRegister(4);
 	if (close(socketid) < 0) {
     printf("socket Close failed");
     kernel->machine->WriteRegister(2,-1);
     }
 	kernel->machine->WriteRegister(2,0);
+	for (int i = 2; i <20;i++){
+		if (kernel->fileSystem->openf[i]->type==4){
+			if (kernel->fileSystem->openf[i]->sID==socketid){
+				delete kernel->fileSystem->openf[i];
+				kernel->fileSystem->openf[i] = NULL;
+
+			}
+		}
+	}
 	IncreasePC();
 	return;
 	ASSERTNOTREACHED();

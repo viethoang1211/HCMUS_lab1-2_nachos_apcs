@@ -29,12 +29,13 @@
 					// See definitions listed under #else
 class OpenFile {
   public:
-
+	int sID; // for socketID
 	int type;
 	char name1[32];
 
     OpenFile(int f) { file = f; currentOffset = 0;type=0; }	// open the file
     OpenFile(int f,int t, char * name) { file = f; currentOffset = 0;type=t; strcpy(name1,name); }	// open the file type t
+	OpenFile(int socketID,int type){sID=socketID;this->type=type;}
 
     ~OpenFile() { Close(file); }			// close the file
 
@@ -76,14 +77,16 @@ class FileHeader;
 class OpenFile {
   public:
 
-
+	int sID;
 	int type;
 	//type 0: read and write
 	//type 1: read only
 	//type2 : console in
 	//type 3: console out
+	// type 4: socket
 	char name[32];
 
+	OpenFile(int socketID,int type);
 
     OpenFile(int sector);		// Open a file whose header is located
 					// at "sector" on the disk
