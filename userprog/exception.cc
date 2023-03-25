@@ -318,7 +318,6 @@ ExceptionHandler(ExceptionType which)
 		filename = User2System(virtAddr,MaxFileLength+1);
 		if (filename == NULL)
 		{
-		 printf("\n Not enough memory in system");
 		 DEBUG('a',"\n Not enough memory in system");
 		 kernel->machine->WriteRegister(2,-1); // trả về lỗi cho chương
 		 // trình người dùng
@@ -328,12 +327,12 @@ ExceptionHandler(ExceptionType which)
 		DEBUG('a',"\n Finish reading filename.");
 		if (!kernel->fileSystem->Create(filename,0))
 		{
-		 printf("\n Error create file '%s'",filename);
+		 DEBUG('a',"\n Error create file\n");
 		 kernel->machine->WriteRegister(2,-1);
 		 delete[] filename;
 		 return IncreasePC(); 
 		}
-		printf("Create file success \n");
+		DEBUG('a',"Create file success \n");
 		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
 		 // người dùng thành công
 		delete[] filename; 
