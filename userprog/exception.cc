@@ -469,11 +469,13 @@ ExceptionHandler(ExceptionType which)
 	if (freeSlot>= 2 && freeSlot<=19){
 	int socketid = socket(AF_INET, SOCK_STREAM, 0);
     if (socketid < 0) {
-        printf("socket creation failed");
+        printf("socket creation failed\n");
         kernel->machine->WriteRegister(2,-1);
     }
 	else{
-		kernel->machine->WriteRegister(2,socketid);
+        printf("socket creation success \n");
+
+		kernel->machine->WriteRegister(2,freeSlot);
 		kernel->fileSystem->openf[freeSlot] = new OpenFile(socketid,4);
 	}
 	}
