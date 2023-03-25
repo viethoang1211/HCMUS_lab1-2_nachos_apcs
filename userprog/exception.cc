@@ -440,7 +440,7 @@ ExceptionHandler(ExceptionType which)
 		 return;
 		}
 		for(int i=2;i<20;i++){
-			if(kernel->fileSystem->openf[i]->name == filename){
+			if(kernel->fileSystem->openf[i]->name1 == filename){
 			printf("\n The file is open");
 		 	DEBUG('a',"\n The file is open");
 		 	kernel->machine->WriteRegister(2,-1); 

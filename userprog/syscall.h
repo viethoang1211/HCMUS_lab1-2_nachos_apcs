@@ -39,7 +39,7 @@
 #define SC_Connect      17
 #define SC_Send         18
 #define SC_Receive      19
-#define SC_CloseSocket  20
+#define SC_CloseSocketTCP  20
 #define SC_Add		42
 
 #ifndef IN_ASM
