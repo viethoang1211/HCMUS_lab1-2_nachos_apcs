@@ -374,16 +374,16 @@ ExceptionHandler(ExceptionType which)
 					kernel->machine->WriteRegister(2, -1); 
 				}
 				delete[] filename;
-				IncreasePC();
-				break;
+				return IncreasePC();
+				
 			}				
 				
 			kernel->machine->WriteRegister(2, -1); //Khong mo duoc file return -1
 			
 			delete[] filename;
 
-			IncreasePC();
-			break;
+			return IncreasePC();
+			
 		}
 
 	case SC_Close:
@@ -437,7 +437,7 @@ ExceptionHandler(ExceptionType which)
 		 return;
 		}
 		for(int i=2;i<20;i++){
-			if(kernel->fileSystem->openf[i]->name1 == filename){
+			if( strcmp(kernel->fileSystem->openf[i]->name1, filename)==0){
 			printf("\n The file is open");
 		 	DEBUG('a',"\n The file is open");
 		 	kernel->machine->WriteRegister(2,-1); 
@@ -457,8 +457,7 @@ ExceptionHandler(ExceptionType which)
 		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
 		 // người dùng thành công
 		delete[] filename; 
-		IncreasePC();
-		return;
+		return IncreasePC();
 	    ASSERTNOTREACHED();
 		break;
 
