@@ -323,7 +323,7 @@ ExceptionHandler(ExceptionType which)
 		 kernel->machine->WriteRegister(2,-1); // trả về lỗi cho chương
 		 // trình người dùng
 		 delete[] filename;
-		 return;
+		 return IncreasePC(); 
 		}
 		DEBUG('a',"\n Finish reading filename.");
 		if (!kernel->fileSystem->Create(filename,0))
@@ -331,16 +331,13 @@ ExceptionHandler(ExceptionType which)
 		 printf("\n Error create file '%s'",filename);
 		 kernel->machine->WriteRegister(2,-1);
 		 delete[] filename;
-		 return;
+		 return IncreasePC(); 
 		}
 		printf("Create file success \n");
 		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
 		 // người dùng thành công
 		delete[] filename; 
-		IncreasePC();
-		return;
-	    ASSERTNOTREACHED();
-		break;
+		return IncreasePC();  
 	}
 
 	case SC_Open:
@@ -398,11 +395,11 @@ ExceptionHandler(ExceptionType which)
 				delete kernel->fileSystem->openf[fid]; //Xoa vung nho luu tru file
 				kernel->fileSystem->openf[fid] = NULL; //Gan vung nho NULL
 				kernel->machine->WriteRegister(2, 0);
-				break;
+				return IncreasePC();
 			}
 		}
 		kernel->machine->WriteRegister(2, -1);
-		break;
+		return IncreasePC();
 	}
 	case SC_Read:
 	{
@@ -434,7 +431,7 @@ ExceptionHandler(ExceptionType which)
 		 kernel->machine->WriteRegister(2,-1); // trả về lỗi cho chương
 		 // trình người dùng
 		 delete[] filename;
-		 return;
+		 return IncreasePC();
 		}
 		for(int i=2;i<20;i++){
 			if( strcmp(kernel->fileSystem->openf[i]->name1, filename)==0){
@@ -442,7 +439,7 @@ ExceptionHandler(ExceptionType which)
 		 	DEBUG('a',"\n The file is open");
 		 	kernel->machine->WriteRegister(2,-1); 
 		 	delete[] filename;
-		 	return;
+		 	return IncreasePC();
 			}
 		}
 		DEBUG('a',"\n Finish reading filename.");
@@ -451,16 +448,13 @@ ExceptionHandler(ExceptionType which)
 		 printf("\n Error remove file '%s'",filename);
 		 kernel->machine->WriteRegister(2,-1);
 		 delete[] filename;
-		 return;
+		 return IncreasePC();
 		}
 		printf("remove file success \n");
 		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
 		 // người dùng thành công
 		delete[] filename; 
 		return IncreasePC();
-	    ASSERTNOTREACHED();
-		break;
-
 	}
 	case SC_SocketTCP:
 	{
