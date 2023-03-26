@@ -364,6 +364,7 @@ ExceptionHandler(ExceptionType which)
 						kernel->machine->WriteRegister(2, freeSlot); //tra ve OpenFileID
 						printf("Open file success \n");
 					}
+					else kernel->machine->WriteRegister(2, -1);
 				}
 				else  
 				{
