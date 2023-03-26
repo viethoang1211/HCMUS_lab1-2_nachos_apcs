@@ -154,6 +154,14 @@ SocketTCP:
 	j	$31
 	.end SocketTCP
 
+	.globl SocketTCP2
+	.ent	SocketTCP2
+SocketTCP2:
+	addiu $2,$0,SC_SocketTCP2
+	syscall
+	j	$31
+	.end SocketTCP2
+
 	.globl Connect
 	.ent	Connect
 Connect:

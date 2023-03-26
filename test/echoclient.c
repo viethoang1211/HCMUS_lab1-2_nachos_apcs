@@ -9,7 +9,7 @@
 
 #define SERVER_ADDR "127.0.0.1"
 #define SERVER_PORT 5000
-#define NUM_SOCKETS 4
+#define NUM_SOCKETS 1
 
 int main(){
     int sockets[NUM_SOCKETS];
@@ -19,7 +19,7 @@ int main(){
     int i=0;
     int port=5000;
     for(i=0;i<NUM_SOCKETS;i++){
-        sockets[i]= SocketTCP();
+        sockets[i]= SocketTCP2();
          if (sockets[i] < 0) {
             Write("socket creation failed: \n",string_length,1);
             return -1;
@@ -41,15 +41,19 @@ int main(){
         // CloseSocketTCP(sockets[i]);
         // printf("Socket %d closed\n", i);
     }
+    Write("t",4,1);
     for (i=0; i< NUM_SOCKETS; i++){
         char reply[1024];
         if (Receive(sockets[i], reply, 1024) < 0) {
         Write("socket recv failed: \n",string_length,1);
         return -1;
     }
-        Write("Socket capitalized: \n",string_length,1);
+        Write("Socket capitalized: \n",15,1);
+        Write(reply,string_length,1);
         if (CloseSocketTCP(sockets[i]) <0 )
         Write("socket closed: \n",string_length,1);
     }
+
+    Write("tem2",string_length,1);
     return 0;
 }

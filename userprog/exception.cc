@@ -483,31 +483,78 @@ ExceptionHandler(ExceptionType which)
 		kernel->machine->WriteRegister(2,-1);
 	}
 
-	IncreasePC();
-	return;
-	ASSERTNOTREACHED();
-	break;
+	return IncreasePC();
+
 	}
+	case SC_SocketTCP2:
+	{
+
+		int freeSlot = kernel->fileSystem->FindFreeSlot();
+		if (freeSlot>= 2 && freeSlot<=19){
+		int socketid = socket(AF_INET, SOCK_STREAM, 0);
+    	if (socketid < 0) {
+    	    printf("socket creation failed\n");
+    	    kernel->machine->WriteRegister(2,-1);
+    	}
+		else{
+    	    printf("socket creation success \n");
+
+			kernel->machine->WriteRegister(2,socketid);
+			kernel->fileSystem->openf[freeSlot] = new OpenFile(socketid,4);
+		}
+		}
+		else {
+			kernel->machine->WriteRegister(2,-1);
+		}
+
+		return IncreasePC();
+	}
+	
 	case SC_Connect:
 	{
 	int socketid =kernel->machine->ReadRegister(4);
 	int virtAddr=kernel->machine->ReadRegister(5);
 	int port=kernel->machine->ReadRegister(6);
 	char* ip = User2System(virtAddr,MaxFileLength+1);
-	struct sockaddr_in serv_addr;
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(port);
-	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)<= 0) {
-		printf("\nInvalid address/ Address not supported \n");
-		kernel->machine->WriteRegister(2,-1);
-	}
-	int status;
-	if ((status= connect(socketid, (struct sockaddr*)&serv_addr,sizeof(serv_addr)))< 0) {
-			printf("\nConnection Failed \n");
-			kernel->machine->WriteRegister(2,-1);
-		}
-	kernel->machine->WriteRegister(2,0);
-	delete[] ip; 
+	// struct sockaddr_in serv_addr;
+	// serv_addr.sin_family = AF_INET;
+
+	// serv_addr.sin_port = htons(port);
+	// if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)<= 0) {
+	// 	printf("\nInvalid address/ Address not supported \n");
+	// 	kernel->machine->WriteRegister(2,-1);
+	// }
+	// int status;
+	// if ((status= connect(socketid, (struct sockaddr*)&serv_addr,sizeof(serv_addr)))< 0) {
+	// 		printf("\nConnection Failed \n");
+	// 		kernel->machine->WriteRegister(2,-1);
+	// 	}
+	// kernel->machine->WriteRegister(2,0);
+	// delete[] ip; 
+
+
+	struct sockaddr_in addr;
+    int result;
+
+    // fill in the address structure
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(ip);
+    addr.sin_port = htons(port);
+
+    // connect to the server
+    result = connect(socketid, (struct sockaddr *)&addr, sizeof(sockaddr_in));
+
+    // check for errors
+    if (result == -1) {
+        perror("connect");
+        // return -1;
+		return;
+    }
+
+    // connection successful
+    // return 0;
+
+
 	IncreasePC();
 	return;
 	ASSERTNOTREACHED();
@@ -539,12 +586,16 @@ ExceptionHandler(ExceptionType which)
 	int len=kernel->machine->ReadRegister(6);
 	char* buffer = User2System(virtAddr,MaxFileLength+1);
 	int bytes_received = recv(socketid, buffer, len,0);
+	printf("%s\n",buffer);
 	if (bytes_received == 0) {
     kernel->machine->WriteRegister(2,0); // Connection closed
+	printf("0 bytes received");
     } else if (bytes_received < 0){
     kernel->machine->WriteRegister(2,-1);
+	printf("receive fail");
 	} // Error 
     kernel->machine->WriteRegister(2,bytes_received);
+	printf("receive success");
 	delete[] buffer;
 	IncreasePC();
 	return;

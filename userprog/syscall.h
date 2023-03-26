@@ -36,6 +36,7 @@
 #define SC_ThreadExit   14
 #define SC_ThreadJoin   15
 #define SC_SocketTCP    16
+#define SC_SocketTCP2   21
 #define SC_Connect      17
 #define SC_Send         18
 #define SC_Receive      19
@@ -149,8 +150,9 @@ int Seek(int position, OpenFileId id);
  * Return 1 on success, negative error code on failure
  */
 int Close(OpenFileId id);
-
+int SocketTCP2();
 int SocketTCP();
+
 int Connect(int socketid, char *ip, int port);
 int Send(int socketid, char *buffer, int len);
 int Receive(int socketid, char *buffer, int len);
