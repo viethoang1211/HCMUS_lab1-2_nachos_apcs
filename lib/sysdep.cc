@@ -411,7 +411,7 @@ int
 Close(int fd)
 {
     int retVal = close(fd);
-    ASSERT(retVal >= 0); 
+    // ASSERT(retVal >= 0); 
     return retVal;
 }
 

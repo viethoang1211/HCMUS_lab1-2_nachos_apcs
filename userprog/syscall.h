@@ -150,9 +150,9 @@ int Seek(int position, OpenFileId id);
  * Return 1 on success, negative error code on failure
  */
 int Close(OpenFileId id);
-int SocketTCP2();
-int SocketTCP();
 
+int SocketTCP();
+int SocketTCP2();
 int Connect(int socketid, char *ip, int port);
 int Send(int socketid, char *buffer, int len);
 int Receive(int socketid, char *buffer, int len);

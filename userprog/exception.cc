@@ -585,7 +585,7 @@ ExceptionHandler(ExceptionType which)
 	int len=kernel->machine->ReadRegister(6);
 	char* buffer = User2System(virtAddr,MaxFileLength+1);
 	int bytes_received = recv(socketid, buffer, len,0);
-	printf("%s\n",buffer);
+	// printf("%s\n",buffer);
 	if (bytes_received == 0) {
     kernel->machine->WriteRegister(2,0); // Connection closed
 	printf("0 bytes received");
@@ -593,8 +593,9 @@ ExceptionHandler(ExceptionType which)
     kernel->machine->WriteRegister(2,-1);
 	printf("receive fail");
 	} // Error 
+	// printf("receive success");
     kernel->machine->WriteRegister(2,bytes_received);
-	printf("receive success");
+	System2User(virtAddr,MaxFileLength+1,buffer);
 	delete[] buffer;
 	IncreasePC();
 	return;
@@ -611,11 +612,13 @@ ExceptionHandler(ExceptionType which)
     }
 	kernel->machine->WriteRegister(2,0);
 	for (int i = 2; i <20;i++){
-		if (kernel->fileSystem->openf[i]->type==4){
-			if (kernel->fileSystem->openf[i]->sID==socketid){
-				delete kernel->fileSystem->openf[i];
-				kernel->fileSystem->openf[i] = NULL;
-
+		if (kernel->fileSystem->openf[i]!=NULL){
+			if (kernel->fileSystem->openf[i]->type==4){
+				if (kernel->fileSystem->openf[i]->sID==socketid){
+					delete kernel->fileSystem->openf[i];
+					kernel->fileSystem->openf[i] = NULL;
+	
+				}
 			}
 		}
 	}

@@ -13,7 +13,7 @@
 
 int main(){
     int sockets[NUM_SOCKETS];
-    char message[] = "Hello from socket";
+    char message[] = "Hello from socket viet";
     char* buffer= message;
     char* server_addr="127.0.0.1";
     int i=0;
@@ -41,19 +41,18 @@ int main(){
         // CloseSocketTCP(sockets[i]);
         // printf("Socket %d closed\n", i);
     }
-    Write("t",4,1);
     for (i=0; i< NUM_SOCKETS; i++){
         char reply[1024];
         if (Receive(sockets[i], reply, 1024) < 0) {
         Write("socket recv failed: \n",string_length,1);
         return -1;
     }
-        Write("Socket capitalized: \n",15,1);
+        Write("Socket capitalized: \n",30,1);
         Write(reply,string_length,1);
         if (CloseSocketTCP(sockets[i]) <0 )
         Write("socket closed: \n",string_length,1);
     }
 
-    Write("tem2",string_length,1);
+    // Write("tem2",string_length,1);
     return 0;
 }
