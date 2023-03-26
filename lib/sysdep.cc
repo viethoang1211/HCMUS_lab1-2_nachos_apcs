@@ -290,10 +290,13 @@ PollFile(int fd)
     retVal = select(32, &rfd, &wfd, &xfd, &pollTime);
 #endif
 
-    ASSERT((retVal == 0) || (retVal == 1));
-    if (retVal == 0)
-	return FALSE;                 		// no char waiting to be read
-    return TRUE;
+    // ASSERT((retVal == 0) || (retVal == 1));
+    if ((retVal == 0) || retVal == 1){
+        if (retVal == 0)
+	    return FALSE;                 		// no char waiting to be read
+        return TRUE;
+    }
+    else return FALSE;
 }
 
 //----------------------------------------------------------------------

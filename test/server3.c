@@ -173,7 +173,11 @@ int main(int argc , char *argv[])
                 {  
                     //set the string terminating NULL byte on the end 
                     //of the data read 
-                    buffer[valread] = '\0';  
+                    buffer[valread] = '\0'; 
+                    int i;
+                    for (i = 0; i < strlen(buffer); i++) {
+                        buffer[i] = toupper(buffer[i]);
+                    } 
                     send(sd , buffer , strlen(buffer) , 0 );  
                 }  
             }  

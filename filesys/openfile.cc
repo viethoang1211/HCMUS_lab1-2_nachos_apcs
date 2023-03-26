@@ -43,6 +43,7 @@ OpenFile::OpenFile(int sector,int type,char * name)
 }
 OpenFile::OpenFile(int socketID,int type)
 {
+    hdr=new FileHeader;
     sID = socketID;
     this->type = type;
 }

@@ -364,6 +364,7 @@ ExceptionHandler(ExceptionType which)
 						kernel->machine->WriteRegister(2, freeSlot); //tra ve OpenFileID
 						printf("Open file success \n");
 					}
+					else kernel->machine->WriteRegister(2, -1);
 				}
 				else  
 				{
@@ -408,6 +409,8 @@ ExceptionHandler(ExceptionType which)
 	{
 		return SysCall_Write();
 	}
+
+
 	case SC_Seek:
 	{
 		return SysCall_Seek();
@@ -559,6 +562,8 @@ ExceptionHandler(ExceptionType which)
 	ASSERTNOTREACHED();
 	break;
 	}
+
+	// send o day
 	case SC_Send:
 	{
 	int socketid =kernel->machine->ReadRegister(4);
@@ -610,6 +615,7 @@ ExceptionHandler(ExceptionType which)
     printf("socket Close failed");
     kernel->machine->WriteRegister(2,-1);
     }
+	// printf("checkpoint");
 	kernel->machine->WriteRegister(2,0);
 	for (int i = 2; i <20;i++){
 		if (kernel->fileSystem->openf[i]!=NULL){
@@ -622,10 +628,11 @@ ExceptionHandler(ExceptionType which)
 			}
 		}
 	}
-	IncreasePC();
-	return;
-	ASSERTNOTREACHED();
-	break;
+	// printf("success point");
+	
+	return IncreasePC();
+	// ASSERTNOTREACHED();
+	// break;
 	}
 
       default:
