@@ -81,12 +81,24 @@ class Thread {
     int *stackTop;			 // the current stack pointer
     void *machineState[MachineStateSize];  // all registers except for stackTop
 
+    //reno
+    bool has_dynamic_name;  // true if the thread name is dynamically allocated
+    //end
   public:
-    Thread(char* debugName);		// initialize a Thread 
+    Thread(char* debugName,bool _has_dynamic_name = false);		// initialize a Thread 
     ~Thread(); 				// deallocate a Thread
 					// NOTE -- thread being deleted
 					// must not be running when delete 
 					// is called
+    
+    //reno
+    int processID;
+    int parrentID;
+    int exitStatus;
+    void FreeSpace() {
+        if (space != 0) delete space;
+    }
+    //end
 
     // basic thread operations
 

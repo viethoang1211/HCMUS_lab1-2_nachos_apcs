@@ -18,11 +18,20 @@
 #include "alarm.h"
 #include "filesys.h"
 #include "machine.h"
+
+
+
 class PostOfficeInput;
 class PostOfficeOutput;
 class SynchConsoleInput;
 class SynchConsoleOutput;
 class SynchDisk;
+class Semaphore;
+
+// lab 2
+#include "bitmap.h"
+#include "stable.h"
+#include "ptable.h"
 
 class Kernel {
   public:
@@ -55,6 +64,14 @@ class Kernel {
     FileSystem *fileSystem;     
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
+
+
+// lab 2 semaphore 
+    Semaphore *addrLock;
+    Bitmap *gPhysPageBitMap;
+    STable *semTab;
+    PTable *pTab;
+
 
     int hostName;               // machine identifier
 
