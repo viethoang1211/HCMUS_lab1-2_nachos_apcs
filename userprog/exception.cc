@@ -81,7 +81,7 @@ void IncreasePC()
     	kernel->machine->WriteRegister(PCReg, counter);
    	kernel->machine->WriteRegister(NextPCReg, counter + 4);
 }
-char* User2System(int virtAddr,int limit)
+char* User2System(int virtAddr,int limit=100)
 {
  int i;// index
  int oneChar;
@@ -229,6 +229,91 @@ void SysCall_Seek(){
 	return IncreasePC();
 }
 
+void handle_SC_Exec() {
+    int virtAddr;
+    virtAddr = kernel->machine->ReadRegister(
+        4);  // doc dia chi ten chuong trinh tu thanh ghi r4
+    char* name;
+    name = User2System(virtAddr);  // Lay ten chuong trinh, nap vao kernel
+    if (name == NULL) {
+        DEBUG(dbgSys, "\n Not enough memory in System");
+        ASSERT(false);
+        kernel->machine->WriteRegister(2, -1);
+        return IncreasePC();
+    }
+
+    kernel->machine->WriteRegister(2, SysExec(name));
+    // DO NOT DELETE NAME, THE THEARD WILL DELETE IT LATER
+    // delete[] name;
+
+    return IncreasePC();
+}
+
+void handle_SC_Join() {
+    int id = kernel->machine->ReadRegister(4);
+    kernel->machine->WriteRegister(2, SysJoin(id));
+    return IncreasePC();
+}
+
+void handle_SC_Exit() {
+    int id = kernel->machine->ReadRegister(4);
+    kernel->machine->WriteRegister(2, SysExit(id));
+    return IncreasePC();
+}
+
+
+void handle_SC_CreateSemaphore() {
+    int virtAddr = kernel->machine->ReadRegister(4);
+    int semval = kernel->machine->ReadRegister(5);
+
+    char* name = User2System(virtAddr);
+    if (name == NULL) {
+        DEBUG(dbgSys, "\n Not enough memory in System");
+        ASSERT(false);
+        kernel->machine->WriteRegister(2, -1);
+        delete[] name;
+        return IncreasePC();
+    }
+
+    kernel->machine->WriteRegister(2, SysCreateSemaphore(name, semval));
+    delete[] name;
+    return IncreasePC();
+}
+
+void handle_SC_Wait() {
+    int virtAddr = kernel->machine->ReadRegister(4);
+
+    char* name = User2System(virtAddr);
+    if (name == NULL) {
+        DEBUG(dbgSys, "\n Not enough memory in System");
+        ASSERT(false);
+        kernel->machine->WriteRegister(2, -1);
+        delete[] name;
+        return IncreasePC();
+    }
+
+    kernel->machine->WriteRegister(2, SysWait(name));
+    delete[] name;
+    return IncreasePC();
+}
+
+void handle_SC_Signal() {
+    int virtAddr = kernel->machine->ReadRegister(4);
+
+    char* name = User2System(virtAddr);
+    if (name == NULL) {
+        DEBUG(dbgSys, "\n Not enough memory in System");
+        ASSERT(false);
+        kernel->machine->WriteRegister(2, -1);
+        delete[] name;
+        return IncreasePC();
+    }
+
+    kernel->machine->WriteRegister(2, SysSignal(name));
+    delete[] name;
+    return IncreasePC();
+}
+
 // int Syscall_SocketTCP(){
 
 
@@ -251,6 +336,12 @@ void SysCall_Seek(){
 
 // 	return IncreasePC();
 // }
+
+
+
+
+
+
 
 void
 ExceptionHandler(ExceptionType which)
@@ -634,6 +725,18 @@ ExceptionHandler(ExceptionType which)
 	// ASSERTNOTREACHED();
 	// break;
 	}
+	case SC_Exec:
+        return handle_SC_Exec();
+    case SC_Join:
+        return handle_SC_Join();
+    case SC_Exit:
+        return handle_SC_Exit();
+    case SC_CreateSemaphore:
+        return handle_SC_CreateSemaphore();
+    case SC_Wait:
+        return handle_SC_Wait();
+    case SC_Signal:
+        return handle_SC_Signal();
 
       default:
 		cerr << "Unexpected system call " << type << "\n";

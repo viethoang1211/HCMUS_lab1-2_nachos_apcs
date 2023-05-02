@@ -43,6 +43,11 @@
 #define SC_CloseSocketTCP  20
 #define SC_Add		42
 
+
+#define SC_CreateSemaphore 30
+#define SC_Wait 31
+#define SC_Signal 32
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -157,6 +162,14 @@ int Connect(int socketid, char *ip, int port);
 int Send(int socketid, char *buffer, int len);
 int Receive(int socketid, char *buffer, int len);
 int CloseSocketTCP(int socketid);
+
+
+
+int CreateSemaphore(char *name, int semval);
+
+int Wait(char *name);
+
+int Signal(char *name);
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 
  *

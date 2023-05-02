@@ -284,13 +284,13 @@ main(int argc, char **argv)
 #endif // FILESYS_STUB
 
     // finally, run an initial user program if requested to do so
+
     if (userProgName != NULL) {
-      AddrSpace *space = new AddrSpace;
-      ASSERT(space != (AddrSpace *)NULL);
-      if (space->Load(userProgName)) {  // load the program into the space
-	space->Execute();              // run the program
-	ASSERTNOTREACHED();            // Execute never returns
-      }
+        AddrSpace *space =
+            new AddrSpace(userProgName);  // load the program into the space
+        ASSERT(space != (AddrSpace *)NULL);
+        space->Execute();    // run the program
+        ASSERTNOTREACHED();  // Execute never returns
     }
 
     // If we don't run a user program, we may get here.

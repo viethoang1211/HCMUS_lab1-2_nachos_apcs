@@ -3074,7 +3074,7 @@ addrspace.o: ../userprog/addrspace.cc /usr/include/stdc-predef.h \
  ../machine/interrupt.h ../machine/callback.h ../machine/stats.h \
  ../threads/alarm.h ../machine/timer.h ../lib/bitmap.h \
  ../threads/stable.h ../threads/sem.h ../threads/ptable.h \
- ../threads/pcb.h ../userprog/noff.h
+ ../threads/pcb.h ../userprog/noff.h ../threads/synch.h
 exception.o: ../userprog/exception.cc /usr/include/stdc-predef.h \
  ../lib/copyright.h ../threads/main.h ../lib/debug.h ../lib/utility.h \
  ../lib/sysdep.h /usr/include/c++/4.8/iostream \
