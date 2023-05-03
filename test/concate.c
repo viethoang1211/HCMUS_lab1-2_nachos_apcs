@@ -2,7 +2,7 @@
 
 int main(int x, char* argv[]){
     char src_1[string_length], src_2[string_length];
-    char* content;
+    char content[string_length];
     int id_src_1;
     int id_src_2;
     int len;

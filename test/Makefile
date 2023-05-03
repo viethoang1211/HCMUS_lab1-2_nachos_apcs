@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments createFile cat copy removeFile concate echoclient fileclient delete shell2
+PROGRAMS = add halt shell matmult sort segments createFile cat copy removeFile concate echoclient fileclient delete shell2 shell3 ping pong
 endif
 
 all: $(PROGRAMS)
@@ -144,6 +144,25 @@ shell2.o: shell2.c
 shell2: shell2.o start.o
 	$(LD) $(LDFLAGS) start.o shell2.o -o shell2.coff
 	$(COFF2NOFF) shell2.coff shell2
+
+shell3.o: shell3.c
+	$(CC) $(CFLAGS) -c shell3.c
+shell3: shell3.o start.o
+	$(LD) $(LDFLAGS) start.o shell3.o -o shell3.coff
+	$(COFF2NOFF) shell3.coff shell3
+
+ping.o: ping.c
+	$(CC) $(CFLAGS) -c ping.c
+ping: ping.o start.o
+	$(LD) $(LDFLAGS) start.o ping.o -o ping.coff
+	$(COFF2NOFF) ping.coff ping
+
+pong.o: pong.c
+	$(CC) $(CFLAGS) -c pong.c
+pong: pong.o start.o
+	$(LD) $(LDFLAGS) start.o pong.o -o pong.coff
+	$(COFF2NOFF) pong.coff pong
+
 
 sort.o: sort.c
 	$(CC) $(CFLAGS) -c sort.c

@@ -2,13 +2,13 @@
 
 int main(int x, char* argv[]){
     char src[string_length], des[string_length];
-    char* content;
+    char content[string_length];
     int id_src;
     int id_des;
     int len;
     int t;
 
-    Write("Input src filename: \n",string_length,1);
+    Write("Input src filename:",string_length,1);
     Read(src,string_length,0);
 
     if((id_src = Open(src,1))==-1){
@@ -19,7 +19,7 @@ int main(int x, char* argv[]){
         Seek(0,id_src);         // move cursor back to the beginning
         Read(content,len,id_src);   // read content into char* content
         
-        Write("Input destination filename: \n",string_length,1);
+        Write("Input destination filename: ",string_length,1);
         Read(des,string_length,0);
         Create(des);
         

@@ -8,5 +8,6 @@ main()
     SpaceId newProc1;
     newProc1 = Exec("cat"); // Project 01
     tem1= Join(newProc1);
+    Write("end",4,1);
     if (tem1!=0) PrintNum(tem1);
 }
