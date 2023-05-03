@@ -74,7 +74,7 @@ Scheduler::ReadyToRun (Thread *thread)
 Thread *
 Scheduler::FindNextToRun ()
 {
-    // ASSERT(kernel->interrupt->getLevel() == IntOff);
+    ASSERT(kernel->interrupt->getLevel() == IntOff);
 
     if (readyList->IsEmpty()) {
 	return NULL;

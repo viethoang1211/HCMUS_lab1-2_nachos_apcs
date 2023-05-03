@@ -16,7 +16,7 @@ private:
 	Semaphore *bmsem;           // dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng
 
 public:
-     PTable(int = 10);           // Khoi tao size doi tuong pcb
+     PTable(int size);           // Khoi tao size doi tuong pcb
                                 // de luu size process.
                                 // Gan gia tri ban dau la null.
     ~PTable();                  // Huy cac doi tuong da tao
