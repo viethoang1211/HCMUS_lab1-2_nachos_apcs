@@ -42,7 +42,7 @@
 #define SC_Receive      19
 #define SC_CloseSocketTCP  20
 #define SC_Add		42
-
+#define SC_Strcmp 23
 
 #define SC_CreateSemaphore 30
 #define SC_Wait 31
@@ -199,7 +199,7 @@ int ThreadJoin(ThreadId id);
  * Deletes current thread and returns ExitCode to every waiting lokal thread.
  */
 void ThreadExit(int ExitCode);	
-
+int Strcmp(const char* str1,const char* str2);
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

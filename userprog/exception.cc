@@ -338,7 +338,20 @@ void handle_SC_Signal() {
     delete[] name;
     return IncreasePC();
 }
+void handle_SC_Strcmp() {
+    int virtAddr1 = kernel->machine->ReadRegister(4);
+    int virtAddr2 = kernel->machine->ReadRegister(5);
 
+
+    char* str1 = stringUser2System(virtAddr1);
+	char* str2 = stringUser2System(virtAddr2);
+
+    kernel->machine->WriteRegister(2, strcmp(str1,str2));
+    delete[] str1;
+	delete[] str2;
+
+	return IncreasePC();
+}
 // int Syscall_SocketTCP(){
 
 
@@ -388,10 +401,6 @@ void handle_SC_PrintNum() {
     return IncreasePC();
 }
 
-
-
-
-
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -409,15 +418,14 @@ ExceptionHandler(ExceptionType which)
     case ReadOnlyException:
     case BusErrorException:
     case AddressErrorException:
+		DEBUG(dbgSys, "Received Exception 5\n");
+		break;
     case OverflowException:
     case IllegalInstrException:
     case NumExceptionTypes:
         cerr << "Error " << which << " occurs\n";
         SysHalt();
         ASSERTNOTREACHED();
-
-
-		
     case SyscallException:
       switch(type) {
 
@@ -808,7 +816,8 @@ ExceptionHandler(ExceptionType which)
         return handle_SC_Wait();
     case SC_Signal:
         return handle_SC_Signal();
-
+	case SC_Strcmp:
+		return handle_SC_Strcmp();
       default:
 		cerr << "Unexpected system call " << type << "\n";
 		break;

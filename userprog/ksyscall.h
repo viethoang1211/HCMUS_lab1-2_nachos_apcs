@@ -83,9 +83,4 @@ int SysSignal(char* name) {
     return 0;
 }
 
-
-
-
-
-
 #endif /* ! __USERPROG_KSYSCALL_H__ */
