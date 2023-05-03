@@ -254,6 +254,15 @@ Signal:
 	.end Signal
 
 
+	.globl Strcmp
+	.ent	Strcmp
+Strcmp:
+	addiu $2,$0,SC_Strcmp
+	syscall
+	j	$31
+	.end Strcmp
+
+
 	.globl PrintNum
 	.ent	PrintNum
 PrintNum:

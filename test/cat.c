@@ -5,9 +5,10 @@ int main(int x, char* argv[]){
     char content[string_length];
     int id;
     int len;
+    Wait("write_std");
     Write("Input filename to read: ",string_length,1);
     Read(filename,string_length,0);
-    
+    Signal("write_std");
     id = Open(filename,1);  // open file
     if(id!=-1){
         len=Seek(-1,id);    // find length of file

@@ -7,9 +7,11 @@ int main(int x, char* argv[]){
     int id_des;
     int len;
     int t;
-
+    Wait("write_std");
     Write("Input src filename:",string_length,1);
+    
     Read(src,string_length,0);
+    Signal("write_std");
 
     if((id_src = Open(src,1))==-1){
         Write("Open src failed\n",string_length,1);
@@ -18,9 +20,11 @@ int main(int x, char* argv[]){
         len=Seek(-1,id_src);    // find length of file
         Seek(0,id_src);         // move cursor back to the beginning
         Read(content,len,id_src);   // read content into char* content
-        
+        Wait("write_std");
         Write("Input destination filename: ",string_length,1);
+        
         Read(des,string_length,0);
+        Signal("write_std");
         Create(des);
         
         if((id_des = Open(des,0))==-1){
