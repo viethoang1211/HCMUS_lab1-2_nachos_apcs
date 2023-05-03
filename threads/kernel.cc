@@ -18,6 +18,8 @@
 #include "synchdisk.h"
 #include "post.h"
 
+
+#define MAX_PROCESS 10
 //----------------------------------------------------------------------
 // Kernel::Kernel
 // 	Interpret command line arguments in order to determine flags 
@@ -85,12 +87,12 @@ Kernel::Kernel(int argc, char **argv)
 //----------------------------------------------------------------------
 
 void
-Kernel::Initialize()
+Kernel::Initialize(char * userProgName)
 {
     // We didn't explicitly allocate the current thread we are running in.
     // But if it ever tries to give up the CPU, we better have a Thread
     // object to save its state. 
-    currentThread = new Thread("main");		
+    currentThread = new Thread(userProgName);		
     currentThread->setStatus(RUNNING);
 
 
@@ -118,6 +120,12 @@ Kernel::Initialize()
 #endif // FILESYS_STUB
     postOfficeIn = new PostOfficeInput(10);
     postOfficeOut = new PostOfficeOutput(reliability);
+    
+    // lab 2
+    addrLock = new Semaphore("addrLock", 1);
+    gPhysPageBitMap = new Bitmap(128);
+    semTab = new STable();
+    pTab = new PTable(MAX_PROCESS);
 
     interrupt->Enable();
 }
@@ -141,6 +149,10 @@ Kernel::~Kernel()
     delete postOfficeIn;
     delete postOfficeOut;
     
+    delete pTab;
+    delete gPhysPageBitMap;
+    delete semTab;
+    delete addrLock;    
     Exit(0);
 }
 

@@ -30,6 +30,7 @@
 
 #include <arpa/inet.h>
 #include <stdio.h>
+#include<stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -72,6 +73,30 @@
 //    	kernel->machine->WriteRegister(NextPCReg, counter + 4);
 // }
 
+char* stringUser2System(int addr, int convert_length = -1) {
+    int length = 0;
+    bool stop = false;
+    char* str;
+
+    do {
+        int oneChar;
+        kernel->machine->ReadMem(addr + length, 1, &oneChar);
+        length++;
+        // if convert_length == -1, we use '\0' to terminate the process
+        // otherwise, we use convert_length to terminate the process
+        stop = ((oneChar == '\0' && convert_length == -1) ||
+                length == convert_length);
+    } while (!stop);
+
+    str = new char[length];
+    for (int i = 0; i < length; i++) {
+        int oneChar;
+        kernel->machine->ReadMem(addr + i, 1,
+                                 &oneChar);  // copy characters to kernel space
+        str[i] = (unsigned char)oneChar;
+    }
+    return str;
+}
 
 void IncreasePC()
 {
@@ -81,7 +106,7 @@ void IncreasePC()
     	kernel->machine->WriteRegister(PCReg, counter);
    	kernel->machine->WriteRegister(NextPCReg, counter + 4);
 }
-char* User2System(int virtAddr,int limit=100)
+char* User2System(int virtAddr,int limit)
 {
  int i;// index
  int oneChar;
@@ -234,7 +259,7 @@ void handle_SC_Exec() {
     virtAddr = kernel->machine->ReadRegister(
         4);  // doc dia chi ten chuong trinh tu thanh ghi r4
     char* name;
-    name = User2System(virtAddr);  // Lay ten chuong trinh, nap vao kernel
+    name = stringUser2System(virtAddr);  // Lay ten chuong trinh, nap vao kernel
     if (name == NULL) {
         DEBUG(dbgSys, "\n Not enough memory in System");
         ASSERT(false);
@@ -266,7 +291,7 @@ void handle_SC_CreateSemaphore() {
     int virtAddr = kernel->machine->ReadRegister(4);
     int semval = kernel->machine->ReadRegister(5);
 
-    char* name = User2System(virtAddr);
+    char* name = stringUser2System(virtAddr);
     if (name == NULL) {
         DEBUG(dbgSys, "\n Not enough memory in System");
         ASSERT(false);
@@ -283,7 +308,7 @@ void handle_SC_CreateSemaphore() {
 void handle_SC_Wait() {
     int virtAddr = kernel->machine->ReadRegister(4);
 
-    char* name = User2System(virtAddr);
+    char* name = stringUser2System(virtAddr);
     if (name == NULL) {
         DEBUG(dbgSys, "\n Not enough memory in System");
         ASSERT(false);
@@ -300,7 +325,7 @@ void handle_SC_Wait() {
 void handle_SC_Signal() {
     int virtAddr = kernel->machine->ReadRegister(4);
 
-    char* name = User2System(virtAddr);
+    char* name = stringUser2System(virtAddr);
     if (name == NULL) {
         DEBUG(dbgSys, "\n Not enough memory in System");
         ASSERT(false);
@@ -336,8 +361,32 @@ void handle_SC_Signal() {
 
 // 	return IncreasePC();
 // }
+/* maximum length of an interger (included the minus sign) */
+#define MAX_NUM_LENGTH 11
+/* A buffer to read and write number */
+char _numberBuffer[MAX_NUM_LENGTH + 2];
+void SysPrintNum(int num) {
+    if (num == 0) return kernel->synchConsoleOut->PutChar('0');
+
+    if (num < 0) {
+        kernel->synchConsoleOut->PutChar('-');
+        num = -num;
+    }
+    int n = 0;
+    while (num) {
+        _numberBuffer[n++] = num % 10;
+        num /= 10;
+    }
+    for (int i = n - 1; i >= 0; --i)
+        kernel->synchConsoleOut->PutChar(_numberBuffer[i] + '0');
+}
 
 
+void handle_SC_PrintNum() {
+    int character = kernel->machine->ReadRegister(4);
+    SysPrintNum(character);
+    return IncreasePC();
+}
 
 
 
@@ -351,6 +400,24 @@ ExceptionHandler(ExceptionType which)
     DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
     switch (which) {
+
+    case NoException:  // return control to kernel
+        kernel->interrupt->setStatus(SystemMode);
+        DEBUG(dbgSys, "Switch to system mode\n");
+        break;
+    case PageFaultException:
+    case ReadOnlyException:
+    case BusErrorException:
+    case AddressErrorException:
+    case OverflowException:
+    case IllegalInstrException:
+    case NumExceptionTypes:
+        cerr << "Error " << which << " occurs\n";
+        SysHalt();
+        ASSERTNOTREACHED();
+
+
+		
     case SyscallException:
       switch(type) {
 
@@ -362,6 +429,10 @@ ExceptionHandler(ExceptionType which)
 
 	ASSERTNOTREACHED();
 	break;
+	// print number
+    case SC_PrintNum:
+        return handle_SC_PrintNum();
+
 
 	//add 
       case SC_Add:

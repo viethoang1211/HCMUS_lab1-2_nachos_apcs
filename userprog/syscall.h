@@ -48,6 +48,8 @@
 #define SC_Wait 31
 #define SC_Signal 32
 
+#define SC_PrintNum 33
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -62,7 +64,7 @@
 
 /* Stop Nachos, and print out performance stats */
 void Halt();		
- 
+void PrintNum(int num);
  
 /*
  * Add the two operants and return the result

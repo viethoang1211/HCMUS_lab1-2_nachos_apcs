@@ -67,6 +67,7 @@ Thread::~Thread()
     ASSERT(this != kernel->currentThread);
     if (stack != NULL)
 	DeallocBoundedArray((char *) stack, StackSize * sizeof(int));
+    if (has_dynamic_name) delete[] name;
 }
 
 //----------------------------------------------------------------------
