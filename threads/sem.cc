@@ -10,8 +10,8 @@ Sem::~Sem() {
     if (sem) delete sem;
 }
 
-void Sem::wait() { sem->P(); }  // Down(sem)
+void Sem::wait() { sem->P(); }  
 
-void Sem::signal() { sem->V(); }  // Up(sem)
+void Sem::signal() { sem->V(); }  
 
 char* Sem::GetName() { return this->name; }
