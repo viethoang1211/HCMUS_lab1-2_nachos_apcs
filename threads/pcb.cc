@@ -21,7 +21,7 @@ PCB::~PCB() {
     delete[] filename;
 }
 
-void StartProcess(void* pid) {
+void startProcess_2(void* pid) {
     int id;
     id = *((int*)pid);
 
@@ -31,7 +31,7 @@ void StartProcess(void* pid) {
     space = new AddrSpace(fileName);
 
     if (space == NULL) {
-        printf("\nPCB::Exec: Can't create AddSpace.");
+        DEBUG(dbgSys,"\nPCB: Can't create AddSpace.");
         return;
     }
 
@@ -46,7 +46,7 @@ int PCB::Exec(char* filename, int id) {
 
     this->thread = new Thread(filename, true);
     if (this->thread == NULL) {
-        printf("\nPCB::Exec: Not enough memory!\n");
+        DEBUG(dbgSys,"\nPCB: Not enough memory\n");
         multex->V();  
         return -1;   
     }
@@ -54,7 +54,7 @@ int PCB::Exec(char* filename, int id) {
 
     this->thread->processID = id;
     this->parentID = kernel->currentThread->processID;
-    this->thread->Fork(StartProcess, &this->thread->processID);
+    this->thread->Fork(startProcess_2, &this->thread->processID);
 
     multex->V();
     return id;

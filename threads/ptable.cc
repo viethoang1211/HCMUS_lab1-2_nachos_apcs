@@ -38,7 +38,7 @@ int PTable::ExecUpdate(char* name) {
     int index = this->GetFreeSlot();
 
     if (index < 0) {
-        printf("\nPTable: No free slot.\n");
+        DEBUG(dbgSys,"\nPTable: No free slot.\n");
         bmsem->V();
         return -1;
     }
