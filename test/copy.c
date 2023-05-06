@@ -38,5 +38,6 @@ int main(int x, char* argv[]){
         }
         Close(id_src);
     }
+    Write("cat!",6,1);
     return 0;
 }

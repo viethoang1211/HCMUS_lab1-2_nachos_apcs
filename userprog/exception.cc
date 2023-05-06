@@ -254,7 +254,7 @@ void SysCall_Seek(){
 	return IncreasePC();
 }
 
-void handle_SC_Exec() {
+void Syscall_Exec() {
     int virtAddr;
     virtAddr = kernel->machine->ReadRegister(
         4);  // doc dia chi ten chuong trinh tu thanh ghi r4
@@ -274,20 +274,20 @@ void handle_SC_Exec() {
     return IncreasePC();
 }
 
-void handle_SC_Join() {
+void Syscall_Join() {
     int id = kernel->machine->ReadRegister(4);
     kernel->machine->WriteRegister(2, SysJoin(id));
     return IncreasePC();
 }
 
-void handle_SC_Exit() {
+void Syscall_Exit() {
     int id = kernel->machine->ReadRegister(4);
     kernel->machine->WriteRegister(2, SysExit(id));
     return IncreasePC();
 }
 
 
-void handle_SC_CreateSemaphore() {
+void Syscall_CreateSemaphore() {
     int virtAddr = kernel->machine->ReadRegister(4);
     int semval = kernel->machine->ReadRegister(5);
 
@@ -305,7 +305,7 @@ void handle_SC_CreateSemaphore() {
     return IncreasePC();
 }
 
-void handle_SC_Wait() {
+void Syscall_Wait() {
     int virtAddr = kernel->machine->ReadRegister(4);
 
     char* name = stringUser2System(virtAddr);
@@ -322,7 +322,7 @@ void handle_SC_Wait() {
     return IncreasePC();
 }
 
-void handle_SC_Signal() {
+void Syscall_Signal() {
     int virtAddr = kernel->machine->ReadRegister(4);
 
     char* name = stringUser2System(virtAddr);
@@ -338,7 +338,7 @@ void handle_SC_Signal() {
     delete[] name;
     return IncreasePC();
 }
-void handle_SC_Strcmp() {
+void Syscall_Strcmp() {
     int virtAddr1 = kernel->machine->ReadRegister(4);
     int virtAddr2 = kernel->machine->ReadRegister(5);
 
@@ -395,7 +395,7 @@ void SysPrintNum(int num) {
 }
 
 
-void handle_SC_PrintNum() {
+void Syscall_PrintNum() {
     int character = kernel->machine->ReadRegister(4);
     SysPrintNum(character);
     return IncreasePC();
@@ -439,7 +439,7 @@ ExceptionHandler(ExceptionType which)
 	break;
 	// print number
     case SC_PrintNum:
-        return handle_SC_PrintNum();
+        return Syscall_PrintNum();
 
 
 	//add 
@@ -503,8 +503,7 @@ ExceptionHandler(ExceptionType which)
 		 return IncreasePC(); 
 		}
 		DEBUG('a',"Create file success \n");
-		kernel->machine->WriteRegister(2,0); // trả về cho chương trình
-		 // người dùng thành công
+		kernel->machine->WriteRegister(2,0); 
 		delete[] filename; 
 		return IncreasePC();  
 	}
@@ -805,19 +804,19 @@ ExceptionHandler(ExceptionType which)
 	// break;
 	}
 	case SC_Exec:
-        return handle_SC_Exec();
+        return Syscall_Exec();
     case SC_Join:
-        return handle_SC_Join();
+        return Syscall_Join();
     case SC_Exit:
-        return handle_SC_Exit();
+        return Syscall_Exit();
     case SC_CreateSemaphore:
-        return handle_SC_CreateSemaphore();
+        return Syscall_CreateSemaphore();
     case SC_Wait:
-        return handle_SC_Wait();
+        return Syscall_Wait();
     case SC_Signal:
-        return handle_SC_Signal();
+        return Syscall_Signal();
 	case SC_Strcmp:
-		return handle_SC_Strcmp();
+		return Syscall_Strcmp();
       default:
 		cerr << "Unexpected system call " << type << "\n";
 		break;

@@ -88,7 +88,6 @@ AddrSpace::AddrSpace()
 
 AddrSpace::~AddrSpace()
 {
-//    delete pageTable;
     int i;
     for (i = 0; i < numPages; i++) {
         kernel->gPhysPageBitMap->Clear(pageTable[i].physicalPage);
@@ -97,86 +96,7 @@ AddrSpace::~AddrSpace()
 }
 
 
-//----------------------------------------------------------------------
-// AddrSpace::Load
-// 	Load a user program into memory from a file.
-//
-//	Assumes that the page table has been initialized, and that
-//	the object code file is in NOFF format.
-//
-//	"fileName" is the file containing the object code to load into memory
-//----------------------------------------------------------------------
 
-// bool 
-// AddrSpace::Load(char *fileName) 
-// {
-//     OpenFile *executable = kernel->fileSystem->Open(fileName);
-//     NoffHeader noffH;
-//     unsigned int size;
-
-//     if (executable == NULL) {
-// 	cerr << "Unable to open file " << fileName << "\n";
-// 	return FALSE;
-//     }
-
-//     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
-//     if ((noffH.noffMagic != NOFFMAGIC) && 
-// 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
-//     	SwapHeader(&noffH);
-//     ASSERT(noffH.noffMagic == NOFFMAGIC);
-
-// #ifdef RDATA
-// // how big is address space?
-//     size = noffH.code.size + noffH.readonlyData.size + noffH.initData.size +
-//            noffH.uninitData.size + UserStackSize;	
-//                                                 // we need to increase the size
-// 						// to leave room for the stack
-// #else
-// // how big is address space?
-//     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
-// 			+ UserStackSize;	// we need to increase the size
-// 						// to leave room for the stack
-// #endif
-//     numPages = divRoundUp(size, PageSize);
-//     size = numPages * PageSize;
-
-//     ASSERT(numPages <= NumPhysPages);		// check we're not trying
-// 						// to run anything too big --
-// 						// at least until we have
-// 						// virtual memory
-
-//     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
-
-// // then, copy in the code and data segments into memory
-// // Note: this code assumes that virtual address = physical address
-//     if (noffH.code.size > 0) {
-//         DEBUG(dbgAddr, "Initializing code segment.");
-// 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
-//         executable->ReadAt(
-// 		&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
-// 			noffH.code.size, noffH.code.inFileAddr);
-//     }
-//     if (noffH.initData.size > 0) {
-//         DEBUG(dbgAddr, "Initializing data segment.");
-// 	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
-//         executable->ReadAt(
-// 		&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
-// 			noffH.initData.size, noffH.initData.inFileAddr);
-//     }
-
-// #ifdef RDATA
-//     if (noffH.readonlyData.size > 0) {
-//         DEBUG(dbgAddr, "Initializing read only data segment.");
-// 	DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
-//         executable->ReadAt(
-// 		&(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
-// 			noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
-//     }
-// #endif
-
-//     delete executable;			// close file
-//     return TRUE;			// success
-// }
 
 
 AddrSpace::AddrSpace(char *fileName) {
@@ -184,26 +104,21 @@ AddrSpace::AddrSpace(char *fileName) {
     NoffHeader noffH;
     unsigned int i, size, j, offset;
     unsigned int numCodePage,
-        numDataPage;  // số trang cho phần code và phần initData
+        numDataPage;  
     int lastCodePageSize, lastDataPageSize, firstDataPageSize,
-        tempDataSize;  // kích thước ghi vào trang cuối Code, initData, và trang
-                       // đầu của initData
-
+        tempDataSize;  
     if (executable == NULL) {
         DEBUG(dbgFile, "\n Error opening file.");
         return;
     }
-    //đọc header của file
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) &&
         (WordToHost(noffH.noffMagic) == NOFFMAGIC))
         SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
     kernel->addrLock->P();
-    // how big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size +
-           UserStackSize;  // we need to increase the size
-                           // to leave room for the stack
+           UserStackSize; 
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
@@ -212,8 +127,6 @@ AddrSpace::AddrSpace(char *fileName) {
                                        // at least until we have
                                        // virtual memory
 
-    // Check the available memory enough to load new process
-    // debug
     if (numPages > kernel->gPhysPageBitMap->NumClear()) {
         DEBUG(dbgAddr, "Not enough free space");
         numPages = 0;
@@ -222,12 +135,10 @@ AddrSpace::AddrSpace(char *fileName) {
         return;
     }
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
-    // first, set up the translation
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
         pageTable[i].virtualPage = i;  // for now, virtual page # = phys page #
         pageTable[i].physicalPage = kernel->gPhysPageBitMap->FindAndSet();
-        // cerr << pageTable[i].physicalPage << endl;
         pageTable[i].valid = TRUE;
         pageTable[i].use = FALSE;
         pageTable[i].dirty = FALSE;

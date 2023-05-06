@@ -30,7 +30,6 @@ int SysAdd(int op1, int op2)
 }
 
 int SysExec(char* name) {
-    // cerr << "call: `" << name  << "`"<< endl;
     OpenFile* oFile = kernel->fileSystem->Open(name);
     if (oFile == NULL) {
         DEBUG(dbgSys, "\nExec:: Can't open this file.");
@@ -38,8 +37,6 @@ int SysExec(char* name) {
     }
 
     delete oFile;
-
-    // Return child process id
     return kernel->pTab->ExecUpdate(name);
 }
 
