@@ -21,7 +21,7 @@ PCB::~PCB() {
     delete[] filename;
 }
 
-void startProcess_2(void* pid) {
+void start_Process(void* pid) {
     int id;
     id = *((int*)pid);
 
@@ -54,7 +54,7 @@ int PCB::Exec(char* filename, int id) {
 
     this->thread->processID = id;
     this->parentID = kernel->currentThread->processID;
-    this->thread->Fork(startProcess_2, &this->thread->processID);
+    this->thread->Fork(start_Process, &this->thread->processID);
 
     multex->V();
     return id;
